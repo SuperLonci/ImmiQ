@@ -41,3 +41,22 @@ button:hover {
     background-color: #ccc197; /* Lighter sand on hover */
     color: #fff; /* White text color on hover */
 }
+
+/* Style for the button to look like a list item */
+.list-item-button {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background-color: #fff; /* White background */
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow for the button */
+    border-radius: 0.42rem; /* Rounded corners */
+}
+
+.list-item-button:hover {
+    background-color: #f0f0f0; /* Light grey background on hover */
+    color: #333; /* Dark text color on hover */
+}

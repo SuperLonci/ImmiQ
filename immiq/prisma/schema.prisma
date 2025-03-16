@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(uuid())
+  email    String  @unique
+  password String
+  name     String
+  houses   House[]
+}
+
+model House {
+  id         String      @id @default(uuid())
+  name       String
+  address    String
+  units      Unit[]
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  fixedCosts FixedCost[]
+  floors     Int
+  meters     Meter[]
+}
+
+model Unit {
+  id      String  @id @default(uuid())
+  name    String
+  houseId String
+  house   House   @relation(fields: [houseId], references: [id])
+  meters  Meter[]
+  rent    Rent[]
+  floor   Int
+}
+
+model Meter {
+  id      String  @id @default(uuid())
+  type    String // e.g., "Water", "Electricity", "Gas"
+  unitId  String?
+  unit    Unit?   @relation(fields: [unitId], references: [id])
+  houseId String?
+  house   House?  @relation(fields: [houseId], references: [id])
+}
+
+model FixedCost {
+  id      String @id @default(uuid())
+  name    String
+  amount  Float
+  houseId String
+  house   House  @relation(fields: [houseId], references: [id])
+}
+
+model Rent {
+  id      String   @id @default(uuid())
+  amount  Float
+  dueDate DateTime
+  status  String // "pending" | "paid" | "overdue"
+  unitId  String
+  unit    Unit     @relation(fields: [unitId], references: [id])
+}

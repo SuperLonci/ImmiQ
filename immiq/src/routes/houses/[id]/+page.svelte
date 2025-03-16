@@ -1,6 +1,6 @@
 <script lang="ts">
     import {onMount} from 'svelte';
-    import {page} from '$app/stores';
+    import {page} from '$app/state';
     import {goto} from '$app/navigation';
 
     interface Unit {
@@ -18,9 +18,7 @@
     }
 
     let house: House;
-    let houseId: string;
-
-    $: houseId = $page.params.id;
+    $: houseId = page.params.id;
 
     onMount(async () => {
         try {

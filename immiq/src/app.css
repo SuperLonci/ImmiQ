@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+/* Custom styles */
+.sidebar {
+    background-color: #C2B280; /* Sand background */
+    color: #000; /* Black text color for visibility */
+}
+
+.sidebar .entry {
+    padding: 10px;
+    color: #000; /* Ensure text is black */
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.sidebar .entry:hover {
+    background-color: #D2B48C; /* Lighter sand background on hover */
+    color: #000; /* Black text color on hover */
+}
+
+/* Additional modern color scheme */
+body {
+    background-color: #f1efeb; /* Light sand background */
+    color: #333; /* Dark text color */
+}
+
+header, footer {
+    background-color: #C2B280; /* Sand background */
+    color: #000; /* Black text color */
+}
+
+button {
+    background-color: #C2B280; /* Sand background */
+    color: #000; /* Black text color */
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+button:hover {
+    background-color: #ccc197; /* Lighter sand on hover */
+    color: #fff; /* White text color on hover */
+}

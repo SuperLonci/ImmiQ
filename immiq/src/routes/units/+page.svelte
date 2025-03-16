@@ -1,2 +1,39 @@
+<script lang="ts">
+    import {onMount} from 'svelte';
+    import {goto} from '$app/navigation';
+
+    interface Unit {
+        id: string;
+        name: string;
+    }
+
+    let units: Unit[] = [];
+
+    onMount(async () => {
+        try {
+            const response = await fetch('/api/units');
+            if (response.ok) {
+                units = await response.json();
+            } else {
+                console.error('Failed to fetch units');
+            }
+        } catch (error) {
+            console.error('Error fetching units:', error);
+        }
+    });
+
+    function viewUnitDetails(id: string) {
+        goto(`/units/${id}`);
+    }
+</script>
+
 <h2 class="text-2xl font-bold text-gray-800 mb-4">Units</h2>
-<p>Manage rental units here.</p>
+<ul class="space-y-2">
+    {#each units as unit}
+        <li>
+            <button class="list-item-button" on:click={() => viewUnitDetails(unit.id)}>
+                {unit.name}
+            </button>
+        </li>
+    {/each}
+</ul>

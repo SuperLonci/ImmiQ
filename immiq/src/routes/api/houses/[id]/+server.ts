@@ -1,12 +1,14 @@
 import {PrismaClient} from '@prisma/client';
+import type {RequestEvent} from '@sveltejs/kit';
 
 const prisma = new PrismaClient();
 
-export async function GET({params}) {
-    const {id} = params;
+export async function GET({params}: RequestEvent) {
+    const {id} = params as { id: string };
     try {
         const house = await prisma.house.findUnique({
             where: {id},
+            include: {units: true}, // Include related units
         });
         if (house) {
             return new Response(JSON.stringify(house), {

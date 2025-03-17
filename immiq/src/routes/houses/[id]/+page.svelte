@@ -47,7 +47,7 @@
         let svgContent = '';
 
         // Add roof with thicker stroke
-        svgContent += `<polygon points="${floorWidth / 2},0 ${floorWidth},${roofHeight} 0,${roofHeight}" style="fill:#A0522D;stroke:black;stroke-width:${strokeWidth}" />`;
+        svgContent += `<polygon points="${floorWidth / 2},0 ${floorWidth},${roofHeight} 0,${roofHeight}" style="fill:#ca6031;stroke:black;stroke-width:${strokeWidth}" />`;
 
         // Process each floor from bottom to top
         for (let i = 0; i < floors; i++) {

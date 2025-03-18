@@ -1,11 +1,7 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import {goto} from '$app/navigation';
-
-    interface Unit {
-        id: string;
-        name: string;
-    }
+    import type {Unit} from '$lib/entities';
 
     let units: Unit[] = [];
 

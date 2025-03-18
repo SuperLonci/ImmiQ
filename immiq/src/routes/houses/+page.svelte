@@ -1,11 +1,7 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import {goto} from '$app/navigation';
-
-    interface House {
-        id: string;
-        name: string;
-    }
+    import type {House} from '$lib/entities';
 
     let houses: House[] = [];
 

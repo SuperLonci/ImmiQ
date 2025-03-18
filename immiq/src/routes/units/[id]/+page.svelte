@@ -1,14 +1,8 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import {page} from '$app/state';
-
-    interface Unit {
-        id: string;
-        name: string;
-        floor: number;
-        meters: { type: string }[];
-        rent: { amount: number, dueDate: string, status: string }[];
-    }
+    import {generateHouseGraphic} from '$lib/houseGraphic';
+    import type {Unit} from '$lib/entities';
 
     let unit: Unit;
     $: unitId = page.params.id;
@@ -30,18 +24,30 @@
 <style>
     .unit-container {
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        flex-direction: row; /* Explicitly set to row to ensure horizontal layout */
+        align-items: flex-start; /* Align items at the top */
+        gap: 20px; /* Space between the graphic and content */
         padding: 20px;
         background-color: #f9f9f9;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        max-width: 600px;
+        max-width: 800px;
         margin: 0 auto;
     }
 
+    .house-graphic-container {
+        flex-shrink: 0; /* Prevent shrinking */
+        padding: 30px;
+    }
+
+    .unit-content {
+        flex: 1;
+        min-width: 0; /* Allow content to shrink below its natural width if needed */
+        padding: 30px;
+    }
+
     .unit-header {
-        text-align: center;
+        text-align: left; /* Align text to the left */
         margin-bottom: 20px;
     }
 
@@ -76,27 +82,41 @@
 
 {#if unit}
     <div class="unit-container">
-        <div class="unit-header">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">{unit.name || 'Unit'}</h2>
-            <p>Floor: {unit.floor}</p>
+        <div class="house-graphic-container">
+            <svg
+                    width="220"
+                    height={(unit.floor + 1) * 70 + 50}
+                    xmlns="http://www.w3.org/2000/svg"
+                    role="img"
+                    aria-label="Schematic representation of the house"
+                    aria-hidden="true"
+            >
+                {@html generateHouseGraphic(unit.floor + 1, [unit])}
+            </svg>
         </div>
-        <div class="unit-details">
-            <h3>Meter Types</h3>
-            <ul>
-                {#each unit.meters as meter}
-                    <li>{meter.type}</li>
-                {/each}
-            </ul>
-            <h3>Rent Details</h3>
-            <ul>
-                {#each unit.rent as rent}
-                    <li>
-                        <p>Amount: ${rent.amount}</p>
-                        <p>Due Date: {new Date(rent.dueDate).toLocaleDateString()}</p>
-                        <p>Status: {rent.status}</p>
-                    </li>
-                {/each}
-            </ul>
+        <div class="unit-content">
+            <div class="unit-header">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">{unit.name || 'Unit'}</h2>
+                <p>Floor: {unit.floor}</p>
+            </div>
+            <div class="unit-details">
+                <h3>Meter Types</h3>
+                <ul>
+                    {#each unit.meters as meter}
+                        <li>{meter.type}</li>
+                    {/each}
+                </ul>
+                <h3>Rent Details</h3>
+                <ul>
+                    {#each unit.rent as rent}
+                        <li>
+                            <p>Amount: ${rent.amount}</p>
+                            <p>Due Date: {new Date(rent.dueDate).toLocaleDateString()}</p>
+                            <p>Status: {rent.status}</p>
+                        </li>
+                    {/each}
+                </ul>
+            </div>
         </div>
     </div>
 {:else}

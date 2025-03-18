@@ -37,6 +37,7 @@
 
     .house-graphic-container {
         flex-shrink: 0; /* Prevent shrinking */
+        filter: drop-shadow(3px 5px 2px rgba(0, 0, 0, 0.2));
         padding: 30px;
     }
 

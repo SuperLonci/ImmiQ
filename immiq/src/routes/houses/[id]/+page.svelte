@@ -47,21 +47,23 @@
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         max-width: 800px;
-        margin: 30px auto 0;
+        margin: 0 auto;
     }
 
     .house-graphic-container {
         flex-shrink: 0;
-        width: 220px;
         filter: drop-shadow(3px 5px 2px rgba(0, 0, 0, 0.2));
+        padding: 30px;
     }
 
     .house-content {
         flex: 1;
         min-width: 0;
+        padding: 30px;
     }
 
     .house-header {
+        text-align: left;
         margin-bottom: 20px;
     }
 

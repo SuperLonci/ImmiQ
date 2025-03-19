@@ -3,10 +3,11 @@
     import {page} from '$app/state';
     import {goto} from '$app/navigation';
     import {generateHouseGraphic} from "$lib/houseGraphic";
-    import type {House, Meter} from '$lib/entities';
+    import type {House, Meter, FixedCost} from '$lib/entities';
 
     let house: House;
     let meters: Meter[] = [];
+    let fixedCosts: FixedCost[] = [];
     $: houseId = page.params.id;
 
     onMount(async () => {
@@ -20,7 +21,11 @@
                 if (!house.meters) {
                     house.meters = [];
                 }
+                if (!house.fixedCosts) {
+                    house.fixedCosts = [];
+                }
                 meters = house.meters;
+                fixedCosts = house.fixedCosts;
             } else {
                 console.error('Failed to fetch house details');
             }
@@ -46,7 +51,6 @@
 </script>
 
 <style>
-    /* Existing styles */
     .house-container {
         display: flex;
         flex-direction: row;
@@ -82,22 +86,22 @@
         font-size: 16px;
     }
 
-    .units-list, .meters-list {
+    .units-list, .meters-list, .fixed-costs-list {
         margin-top: 20px;
     }
 
-    .units-list h3, .meters-list h3 {
+    .units-list h3, .meters-list h3, .fixed-costs-list h3 {
         font-size: 18px;
         color: #333;
         margin-bottom: 10px;
     }
 
-    .units-list ul, .meters-list ul {
+    .units-list ul, .meters-list ul, .fixed-costs-list ul {
         list-style-type: none;
         padding: 0;
     }
 
-    .units-list ul li, .meters-list ul li {
+    .units-list ul li, .meters-list ul li, .fixed-costs-list ul li {
         background-color: #fff;
         padding: 10px;
         margin: 5px 0;
@@ -107,11 +111,11 @@
         transition: background-color 0.2s;
     }
 
-    .units-list ul li:hover, .meters-list ul li:hover {
+    .units-list ul li:hover, .meters-list ul li:hover, .fixed-costs-list ul li:hover {
         background-color: #f0f0f0;
     }
 
-    .unit-button, .meter-button {
+    .unit-button, .meter-button, .fixed-cost-button {
         display: block;
         width: 100%;
         padding: 5px;
@@ -125,12 +129,12 @@
         font-size: inherit;
     }
 
-    .unit-button:hover, .meter-button:hover {
+    .unit-button:hover, .meter-button:hover, .fixed-cost-button:hover {
         background-color: #f0f0f0;
         color: black;
     }
 
-    .unit-button:focus, .meter-button:focus {
+    .unit-button:focus, .meter-button:focus, .fixed-cost-button:focus {
         outline: 2px solid #4a90e2;
     }
 
@@ -194,6 +198,23 @@
                                         aria-label="View details for {meter.type} meter"
                                 >
                                     <strong>{meter.type}</strong>
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </div>
+            {/if}
+            {#if fixedCosts && fixedCosts.length > 0}
+                <div class="fixed-costs-list">
+                    <h3>Fixed Costs</h3>
+                    <ul>
+                        {#each fixedCosts as cost}
+                            <li>
+                                <button
+                                        class="fixed-cost-button"
+                                        aria-label="View details for {cost.name}"
+                                >
+                                    <strong>{cost.name}</strong> - {cost.amount}
                                 </button>
                             </li>
                         {/each}

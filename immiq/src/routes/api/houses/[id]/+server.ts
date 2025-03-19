@@ -10,7 +10,8 @@ export async function GET({params}: RequestEvent) {
             where: {id},
             include: {
                 units: true, // Include related units
-                meters: true // Include related meters
+                meters: true, // Include related meters
+                fixedCosts: true,
             },
         });
         if (house) {

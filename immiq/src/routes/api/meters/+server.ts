@@ -7,12 +7,12 @@ export async function GET(event: RequestEvent) {
     try {
         const meters = await prisma.meter.findMany({
             include: {
-                house: {
+                building: {
                     select: {
                         name: true
                     }
                 },
-                unit: {
+                apartment: {
                     select: {
                         name: true
                     }

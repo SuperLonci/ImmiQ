@@ -28,7 +28,7 @@
     {#each meters as meter}
         <li>
             <button class="list-item-button" on:click={() => viewMeterDetails(meter.id)}>
-                {meter.type} - {meter.house?.name || meter.unit?.name || 'N/A'}
+                {meter.type} - {meter.building?.name || meter.apartment?.name || 'N/A'}
             </button>
         </li>
     {/each}

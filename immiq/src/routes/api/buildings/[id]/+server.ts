@@ -6,21 +6,26 @@ const prisma = new PrismaClient();
 export async function GET({params}: RequestEvent) {
     const {id} = params as { id: string };
     try {
-        const unit = await prisma.unit.findUnique({
+        const building = await prisma.building.findUnique({
             where: {id},
+            include: {
+                apartments: true, // Include related apartments
+                meters: true, // Include related meters
+                costs: true,
+            },
         });
-        if (unit) {
-            return new Response(JSON.stringify(unit), {
+        if (building) {
+            return new Response(JSON.stringify(building), {
                 headers: {'Content-Type': 'application/json'},
             });
         } else {
-            return new Response(JSON.stringify({error: 'Unit not found'}), {
+            return new Response(JSON.stringify({error: 'building not found'}), {
                 status: 404,
                 headers: {'Content-Type': 'application/json'},
             });
         }
     } catch (error) {
-        return new Response(JSON.stringify({error: 'Failed to fetch unit details'}), {
+        return new Response(JSON.stringify({error: 'Failed to fetch building details'}), {
             status: 500,
             headers: {'Content-Type': 'application/json'},
         });

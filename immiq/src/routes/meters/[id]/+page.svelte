@@ -52,8 +52,8 @@
         </div>
         <div class="meter-details">
             <p><strong>Type:</strong> {meter.type}</p>
-            <p><strong>House ID:</strong> {meter.houseId || 'N/A'}</p>
-            <p><strong>Unit ID:</strong> {meter.unitId || 'N/A'}</p>
+            <p><strong>House ID:</strong> {meter.buildingId || 'N/A'}</p>
+            <p><strong>Unit ID:</strong> {meter.apartmentId || 'N/A'}</p>
         </div>
     </div>
 {:else}

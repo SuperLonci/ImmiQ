@@ -20,8 +20,8 @@ async function main() {
         },
     });
 
-    // Create Houses
-    const house1 = await prisma.house.create({
+    // Create Buildings
+    const building1 = await prisma.building.create({
         data: {
             name: 'Sunset Villa',
             address: '123 Sunset Blvd',
@@ -30,7 +30,7 @@ async function main() {
         },
     });
 
-    const house2 = await prisma.house.create({
+    const building2 = await prisma.building.create({
         data: {
             name: 'Modern Loft',
             address: '456 Modern St',
@@ -39,36 +39,40 @@ async function main() {
         },
     });
 
-    // Create Units
-    const unit1 = await prisma.unit.create({
+    // Create Apartments
+    const apartment1 = await prisma.apartment.create({
         data: {
-            name: 'Unit 1A',
-            houseId: house1.id,
+            name: 'Apartment 1A',
+            buildingId: building1.id,
             floor: 0,
+            type: 'APARTMENT',
         },
     });
 
-    const unit2 = await prisma.unit.create({
+    const apartment2 = await prisma.apartment.create({
         data: {
-            name: 'Unit 2A',
-            houseId: house1.id,
+            name: 'Apartment 2A',
+            buildingId: building1.id,
             floor: 1,
+            type: 'APARTMENT',
         },
     });
 
-    const unit3 = await prisma.unit.create({
+    const apartment3 = await prisma.apartment.create({
         data: {
-            name: 'Unit 2B',
-            houseId: house1.id,
+            name: 'Apartment 2B',
+            buildingId: building1.id,
             floor: 1,
+            type: 'APARTMENT',
         },
     });
 
-    const unit4 = await prisma.unit.create({
+    const apartment4 = await prisma.apartment.create({
         data: {
-            name: 'Unit 2A',
-            houseId: house2.id,
+            name: 'Apartment 2A',
+            buildingId: building2.id,
             floor: 0,
+            type: 'APARTMENT',
         },
     });
 
@@ -76,50 +80,75 @@ async function main() {
     const meter1 = await prisma.meter.create({
         data: {
             type: 'Water',
-            houseId: house1.id,
+            unit: 'm3',
+            costPerUnit: 2.5,
+            buildingId: building1.id,
         },
     });
 
     const meter2 = await prisma.meter.create({
         data: {
             type: 'Electricity',
-            houseId: house2.id,
+            unit: 'kWh',
+            costPerUnit: 0.15,
+            buildingId: building2.id,
         },
     });
 
-    // Create Fixed Costs
-    const fixedCost1 = await prisma.fixedCost.create({
+    // Create Costs
+    const cost1 = await prisma.cost.create({
         data: {
             name: 'Maintenance',
             amount: 100.0,
-            houseId: house1.id,
+            currency: 'USD',
+            type: 'SERVICE_CHARGE',
+            interval: 'MONTHLY',
+            buildingId: building1.id,
         },
     });
 
-    const fixedCost2 = await prisma.fixedCost.create({
+    const cost2 = await prisma.cost.create({
         data: {
             name: 'Security',
             amount: 150.0,
-            houseId: house2.id,
+            currency: 'EUR',
+            type: 'SERVICE_CHARGE',
+            interval: 'YEARLY',
+            buildingId: building2.id,
         },
     });
 
-    // Create Rents
-    const rent1 = await prisma.rent.create({
+    // Create Payments
+    const payment1 = await prisma.payment.create({
         data: {
             amount: 1200.0,
+            currency: 'USD',
             dueDate: new Date('2023-11-01'),
             status: 'pending',
-            unitId: unit1.id,
+            type: 'REGULAR_RENT',
+            apartmentId: apartment1.id,
         },
     });
 
-    const rent2 = await prisma.rent.create({
+    const payment2 = await prisma.payment.create({
         data: {
             amount: 1500.0,
+            currency: 'USD',
             dueDate: new Date('2023-11-01'),
             status: 'paid',
-            unitId: unit2.id,
+            type: 'REGULAR_RENT',
+            apartmentId: apartment2.id,
+        },
+    });
+
+    const payment3 = await prisma.payment.create({
+        data: {
+            amount: 200.0,
+            currency: 'USD',
+            dueDate: new Date('2023-12-01'),
+            status: 'pending',
+            type: 'ADDITIONAL_PAYMENT',
+            apartmentId: apartment1.id,
         },
     });
 }

@@ -3,34 +3,34 @@
     import {page} from '$app/state';
     import {goto} from '$app/navigation';
     import {generateHouseGraphic} from "$lib/houseGraphic";
-    import type {House, Meter, FixedCost} from '$lib/entities';
+    import type {Building, Meter, Cost} from '$lib/entities';
 
-    let house: House;
+    let building: Building;
     let meters: Meter[] = [];
-    let fixedCosts: FixedCost[] = [];
-    $: houseId = page.params.id;
+    let costs: Cost[] = [];
+    $: buildingId = page.params.id;
 
     onMount(async () => {
         try {
-            const response = await fetch(`/api/houses/${houseId}`);
+            const response = await fetch(`/api/buildings/${buildingId}`);
             if (response.ok) {
-                house = await response.json();
-                if (!house.units) {
-                    house.units = [];
+                building = await response.json();
+                if (!building.apartments) {
+                    building.apartments = [];
                 }
-                if (!house.meters) {
-                    house.meters = [];
+                if (!building.meters) {
+                    building.meters = [];
                 }
-                if (!house.fixedCosts) {
-                    house.fixedCosts = [];
+                if (!building.costs) {
+                    building.costs = [];
                 }
-                meters = house.meters;
-                fixedCosts = house.fixedCosts;
+                meters = building.meters;
+                costs = building.costs;
             } else {
-                console.error('Failed to fetch house details');
+                console.error('Failed to fetch building details');
             }
         } catch (error) {
-            console.error('Error fetching house details:', error);
+            console.error('Error fetching building details:', error);
         }
     });
 
@@ -40,7 +40,7 @@
         if (unitGroup) {
             const unitId = unitGroup.getAttribute('data-unit-id');
             if (unitId) {
-                goto(`/units/${unitId}`);
+                goto(`/apartments/${unitId}`);
             }
         }
     }
@@ -51,7 +51,7 @@
 </script>
 
 <style>
-    .house-container {
+    .building-container {
         display: flex;
         flex-direction: row;
         align-items: flex-start;
@@ -64,44 +64,44 @@
         margin: 0 auto;
     }
 
-    .house-graphic-container {
+    .building-graphic-container {
         flex-shrink: 0;
         filter: drop-shadow(3px 5px 2px rgba(0, 0, 0, 0.2));
         padding: 30px;
     }
 
-    .house-content {
+    .building-content {
         flex: 1;
         min-width: 0;
         padding: 30px;
     }
 
-    .house-header {
+    .building-header {
         text-align: left;
         margin-bottom: 20px;
     }
 
-    .house-details p {
+    .building-details p {
         margin: 10px 0;
         font-size: 16px;
     }
 
-    .units-list, .meters-list, .fixed-costs-list {
+    .apartments-list, .meters-list, .fixed-costs-list {
         margin-top: 20px;
     }
 
-    .units-list h3, .meters-list h3, .fixed-costs-list h3 {
+    .apartments-list h3, .meters-list h3, .fixed-costs-list h3 {
         font-size: 18px;
         color: #333;
         margin-bottom: 10px;
     }
 
-    .units-list ul, .meters-list ul, .fixed-costs-list ul {
+    .apartments-list ul, .meters-list ul, .fixed-costs-list ul {
         list-style-type: none;
         padding: 0;
     }
 
-    .units-list ul li, .meters-list ul li, .fixed-costs-list ul li {
+    .apartments-list ul li, .meters-list ul li, .fixed-costs-list ul li {
         background-color: #fff;
         padding: 10px;
         margin: 5px 0;
@@ -111,7 +111,7 @@
         transition: background-color 0.2s;
     }
 
-    .units-list ul li:hover, .meters-list ul li:hover, .fixed-costs-list ul li:hover {
+    .apartments-list ul li:hover, .meters-list ul li:hover, .fixed-costs-list ul li:hover {
         background-color: #f0f0f0;
     }
 
@@ -144,39 +144,39 @@
     }
 </style>
 
-{#if house}
-    <div class="house-container">
-        <div class="house-graphic-container">
+{#if building}
+    <div class="building-container">
+        <div class="building-graphic-container">
             <svg
                     width="220"
-                    height={(house.floors || 1) * 70 + 50}
+                    height={(building.floors || 1) * 70 + 50}
                     xmlns="http://www.w3.org/2000/svg"
                     on:click={handleUnitClick}
                     role="img"
-                    aria-label="Schematic representation of the house"
+                    aria-label="Schematic representation of the building"
                     aria-hidden="true"
             >
-                {@html generateHouseGraphic(house.floors || 1, house.units || [])}
+                {@html generateHouseGraphic(building.floors || 1, building.apartments || [])}
             </svg>
         </div>
-        <div class="house-content">
-            <div class="house-header">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">{house.name || 'House'}</h2>
+        <div class="building-content">
+            <div class="building-header">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">{building.name || 'House'}</h2>
             </div>
-            <div class="house-details">
-                <p><strong>Address:</strong> {house.address || 'No address'}</p>
-                <p><strong>Floors:</strong> {house.floors || 1}</p>
-                <p><strong>Total Units:</strong> {(house.units && house.units.length) || 0}</p>
+            <div class="building-details">
+                <p><strong>Address:</strong> {building.address || 'No address'}</p>
+                <p><strong>Floors:</strong> {building.floors || 1}</p>
+                <p><strong>Total Units:</strong> {(building.apartments && building.apartments.length) || 0}</p>
             </div>
-            {#if house.units && house.units.length > 0}
-                <div class="units-list">
+            {#if building.apartments && building.apartments.length > 0}
+                <div class="apartments-list">
                     <h3>Units</h3>
                     <ul>
-                        {#each house.units as unit}
+                        {#each building.apartments as unit}
                             <li>
                                 <button
                                         class="unit-button"
-                                        on:click={() => goto(`/units/${unit.id}`)}
+                                        on:click={() => goto(`/apartments/${unit.id}`)}
                                         aria-label="View details for {unit.name || 'Unnamed Unit'}"
                                 >
                                     <strong>{unit.name || 'Unnamed Unit'}</strong> - Floor {unit.floor}
@@ -204,11 +204,11 @@
                     </ul>
                 </div>
             {/if}
-            {#if fixedCosts && fixedCosts.length > 0}
+            {#if costs && costs.length > 0}
                 <div class="fixed-costs-list">
                     <h3>Fixed Costs</h3>
                     <ul>
-                        {#each fixedCosts as cost}
+                        {#each costs as cost}
                             <li>
                                 <button
                                         class="fixed-cost-button"
@@ -225,6 +225,6 @@
     </div>
 {:else}
     <div class="flex justify-center items-center h-64">
-        <p>Loading house details...</p>
+        <p>Loading building details...</p>
     </div>
 {/if}

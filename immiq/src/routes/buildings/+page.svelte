@@ -1,31 +1,31 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import {goto} from '$app/navigation';
-    import type {House} from '$lib/entities';
+    import type {Building} from '$lib/entities';
 
-    let houses: House[] = [];
+    let buildings: Building[] = [];
 
     onMount(async () => {
         try {
-            const response = await fetch('/api/houses');
+            const response = await fetch('/api/buildings');
             if (response.ok) {
-                houses = await response.json();
+                buildings = await response.json();
             } else {
-                console.error('Failed to fetch houses');
+                console.error('Failed to fetch buildings');
             }
         } catch (error) {
-            console.error('Error fetching houses:', error);
+            console.error('Error fetching buildings:', error);
         }
     });
 
     function viewHouseDetails(id: string) {
-        goto(`/houses/${id}`);
+        goto(`/buildings/${id}`);
     }
 </script>
 
 <h2 class="text-2xl font-bold text-gray-800 mb-4">Houses</h2>
 <ul class="space-y-2">
-    {#each houses as house}
+    {#each buildings as house}
         <li>
             <button class="list-item-button" on:click={() => viewHouseDetails(house.id)}>
                 {house.name}

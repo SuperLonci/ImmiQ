@@ -2,27 +2,27 @@
     import {onMount} from 'svelte';
     import {page} from '$app/state';
     import {generateHouseGraphic} from '$lib/houseGraphic';
-    import type {Unit} from '$lib/entities';
+    import type {Apartment} from '$lib/entities';
 
-    let unit: Unit;
-    $: unitId = page.params.id;
+    let apartment: Apartment;
+    $: apartmentId = page.params.id;
 
     onMount(async () => {
         try {
-            const response = await fetch(`/api/units/${unitId}`);
+            const response = await fetch(`/api/apartments/${apartmentId}`);
             if (response.ok) {
-                unit = await response.json();
+                apartment = await response.json();
             } else {
-                console.error('Failed to fetch unit details');
+                console.error('Failed to fetch apartment details');
             }
         } catch (error) {
-            console.error('Error fetching unit details:', error);
+            console.error('Error fetching apartment details:', error);
         }
     });
 </script>
 
 <style>
-    .unit-container {
+    .apartment-container {
         display: flex;
         flex-direction: row; /* Explicitly set to row to ensure horizontal layout */
         align-items: flex-start; /* Align items at the top */
@@ -41,38 +41,38 @@
         padding: 30px;
     }
 
-    .unit-content {
+    .apartment-content {
         flex: 1;
         min-width: 0; /* Allow content to shrink below its natural width if needed */
         padding: 30px;
     }
 
-    .unit-header {
+    .apartment-header {
         text-align: left; /* Align text to the left */
         margin-bottom: 20px;
     }
 
-    .unit-details {
+    .apartment-details {
         width: 100%;
     }
 
-    .unit-details p {
+    .apartment-details p {
         margin: 10px 0;
         font-size: 16px;
     }
 
-    .unit-details h3 {
+    .apartment-details h3 {
         margin-top: 20px;
         font-size: 18px;
         color: #333;
     }
 
-    .unit-details ul {
+    .apartment-details ul {
         list-style-type: none;
         padding: 0;
     }
 
-    .unit-details ul li {
+    .apartment-details ul li {
         background-color: #fff;
         padding: 10px;
         margin: 5px 0;
@@ -81,35 +81,35 @@
     }
 </style>
 
-{#if unit}
-    <div class="unit-container">
+{#if apartment}
+    <div class="apartment-container">
         <div class="house-graphic-container">
             <svg
                     width="220"
-                    height={(unit.floor + 1) * 70 + 50}
+                    height={(apartment.floor + 1) * 70 + 50}
                     xmlns="http://www.w3.org/2000/svg"
                     role="img"
                     aria-label="Schematic representation of the house"
                     aria-hidden="true"
             >
-                {@html generateHouseGraphic(unit.floor + 1, [unit])}
+                {@html generateHouseGraphic(apartment.floor + 1, [apartment])}
             </svg>
         </div>
-        <div class="unit-content">
-            <div class="unit-header">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">{unit.name || 'Unit'}</h2>
-                <p>Floor: {unit.floor}</p>
+        <div class="apartment-content">
+            <div class="apartment-header">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">{apartment.name || 'Unit'}</h2>
+                <p>Floor: {apartment.floor}</p>
             </div>
-            <div class="unit-details">
+            <div class="apartment-details">
                 <h3>Meter Types</h3>
                 <ul>
-                    {#each unit.meters as meter}
+                    {#each apartment.meters as meter}
                         <li>{meter.type}</li>
                     {/each}
                 </ul>
                 <h3>Rent Details</h3>
                 <ul>
-                    {#each unit.rent as rent}
+                    {#each apartment.payments as rent}
                         <li>
                             <p>Amount: ${rent.amount}</p>
                             <p>Due Date: {new Date(rent.dueDate).toLocaleDateString()}</p>
@@ -122,6 +122,6 @@
     </div>
 {:else}
     <div class="flex justify-center items-center h-64">
-        <p>Loading unit details...</p>
+        <p>Loading apartment details...</p>
     </div>
 {/if}

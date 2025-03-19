@@ -2,10 +2,10 @@
     import "../app.css";
 
     let menuItems = [
-        {name: 'Houses', path: '/houses'},
-        {name: 'Units', path: '/units'},
+        {name: 'Buildings', path: '/buildings'},
+        {name: 'Apartments', path: '/apartments'},
         {name: 'Meters', path: '/meters'},
-        {name: 'Fixed Costs', path: '/fixed-costs'},
+        {name: 'Costs', path: '/costs'},
     ];
 
     let isSidebarCollapsed = false;

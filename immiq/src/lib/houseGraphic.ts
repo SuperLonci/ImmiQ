@@ -1,6 +1,6 @@
-import type {Unit} from '$lib/entities';
+import type {Apartment} from '$lib/entities';
 
-export function generateHouseGraphic(floors: number, units: Unit[] = []): string {
+export function generateHouseGraphic(floors: number, apartments: Apartment[] = []): string {
     const floorHeight = 70;
     const floorWidth = 220;
     const roofHeight = 50;
@@ -21,17 +21,17 @@ export function generateHouseGraphic(floors: number, units: Unit[] = []): string
         // Add floor base with beige color
         svgContent += `<rect x="0" y="${y}" width="${floorWidth}" height="${floorHeight}" style="fill:${backgroundColor};stroke:black;stroke-width:${strokeWidth}" />`;
 
-        // Get units for this floor
-        const unitsOnFloor = units.filter(unit => unit.floor === floorNumber);
+        // Get apartments for this floor
+        const apartmentsOnFloor = apartments.filter(unit => unit.floor === floorNumber);
 
-        if (unitsOnFloor.length > 0) {
-            const unitWidth = floorWidth / unitsOnFloor.length;
+        if (apartmentsOnFloor.length > 0) {
+            const unitWidth = floorWidth / apartmentsOnFloor.length;
 
-            // Add units
-            unitsOnFloor.forEach((unit, index) => {
+            // Add apartments
+            apartmentsOnFloor.forEach((unit, index) => {
                 const x = index * unitWidth;
                 // Get color based on overall unit index, not per floor
-                const unitIndex = units.findIndex(u => u.id === unit.id);
+                const unitIndex = apartments.findIndex(u => u.id === unit.id);
                 const unitColor = getUnitColor(unitIndex);
 
                 // Create unit rectangle with thick border

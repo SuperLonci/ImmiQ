@@ -5,14 +5,12 @@ const prisma = new PrismaClient();
 
 export async function GET(event: RequestEvent) {
     try {
-        const houses = await prisma.house.findMany({
-            include: {units: true}, // Include related units
-        });
-        return new Response(JSON.stringify(houses), {
+        const apartments = await prisma.apartment.findMany();
+        return new Response(JSON.stringify(apartments), {
             headers: {'Content-Type': 'application/json'},
         });
     } catch (error) {
-        return new Response(JSON.stringify({error: 'Failed to fetch houses'}), {
+        return new Response(JSON.stringify({error: 'Failed to fetch apartments'}), {
             status: 500,
             headers: {'Content-Type': 'application/json'},
         });

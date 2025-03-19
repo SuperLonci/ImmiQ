@@ -8,7 +8,10 @@ export async function GET({params}: RequestEvent) {
     try {
         const house = await prisma.house.findUnique({
             where: {id},
-            include: {units: true}, // Include related units
+            include: {
+                units: true, // Include related units
+                meters: true // Include related meters
+            },
         });
         if (house) {
             return new Response(JSON.stringify(house), {

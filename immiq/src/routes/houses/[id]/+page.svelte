@@ -3,9 +3,10 @@
     import {page} from '$app/state';
     import {goto} from '$app/navigation';
     import {generateHouseGraphic} from "$lib/houseGraphic";
-    import type {House} from '$lib/entities';
+    import type {House, Meter} from '$lib/entities';
 
     let house: House;
+    let meters: Meter[] = [];
     $: houseId = page.params.id;
 
     onMount(async () => {
@@ -16,6 +17,10 @@
                 if (!house.units) {
                     house.units = [];
                 }
+                if (!house.meters) {
+                    house.meters = [];
+                }
+                meters = house.meters;
             } else {
                 console.error('Failed to fetch house details');
             }
@@ -34,9 +39,14 @@
             }
         }
     }
+
+    function handleMeterClick(meterId: string) {
+        goto(`/meters/${meterId}`);
+    }
 </script>
 
 <style>
+    /* Existing styles */
     .house-container {
         display: flex;
         flex-direction: row;
@@ -72,22 +82,22 @@
         font-size: 16px;
     }
 
-    .units-list {
+    .units-list, .meters-list {
         margin-top: 20px;
     }
 
-    .units-list h3 {
+    .units-list h3, .meters-list h3 {
         font-size: 18px;
         color: #333;
         margin-bottom: 10px;
     }
 
-    .units-list ul {
+    .units-list ul, .meters-list ul {
         list-style-type: none;
         padding: 0;
     }
 
-    .units-list ul li {
+    .units-list ul li, .meters-list ul li {
         background-color: #fff;
         padding: 10px;
         margin: 5px 0;
@@ -97,11 +107,11 @@
         transition: background-color 0.2s;
     }
 
-    .units-list ul li:hover {
+    .units-list ul li:hover, .meters-list ul li:hover {
         background-color: #f0f0f0;
     }
 
-    .unit-button {
+    .unit-button, .meter-button {
         display: block;
         width: 100%;
         padding: 5px;
@@ -115,12 +125,12 @@
         font-size: inherit;
     }
 
-    .unit-button:hover {
+    .unit-button:hover, .meter-button:hover {
         background-color: #f0f0f0;
         color: black;
     }
 
-    .unit-button:focus {
+    .unit-button:focus, .meter-button:focus {
         outline: 2px solid #4a90e2;
     }
 
@@ -166,6 +176,24 @@
                                         aria-label="View details for {unit.name || 'Unnamed Unit'}"
                                 >
                                     <strong>{unit.name || 'Unnamed Unit'}</strong> - Floor {unit.floor}
+                                </button>
+                            </li>
+                        {/each}
+                    </ul>
+                </div>
+            {/if}
+            {#if meters && meters.length > 0}
+                <div class="meters-list">
+                    <h3>Meters</h3>
+                    <ul>
+                        {#each meters as meter}
+                            <li>
+                                <button
+                                        class="meter-button"
+                                        on:click={() => handleMeterClick(meter.id)}
+                                        aria-label="View details for {meter.type} meter"
+                                >
+                                    <strong>{meter.type}</strong>
                                 </button>
                             </li>
                         {/each}

@@ -13,58 +13,142 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       String  @id @default(uuid())
-  email    String  @unique
-  password String
-  name     String
-  houses   House[]
+enum Currency {
+  EUR
+  USD
+  GBP
 }
 
-model House {
+enum CostInterval {
+  ONE_TIME
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum CostType {
+  SERVICE_CHARGE
+  BASE_RENT
+  OTHER
+}
+
+enum PaymentType {
+  REGULAR_RENT
+  ADDITIONAL_PAYMENT
+  SERVICE_CHARGE
+  OTHER
+}
+
+enum ApartmentType {
+  HOUSE
+  APARTMENT
+  STUDIO
+  LOFT
+  DUPLEX
+  PENTHOUSE
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  name      String
+  buildings Building[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Building {
   id         String      @id @default(uuid())
   name       String
   address    String
-  units      Unit[]
+  apartments Apartment[]
   userId     String
   user       User        @relation(fields: [userId], references: [id])
-  fixedCosts FixedCost[]
+  costs      Cost[]
   floors     Int
   meters     Meter[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 }
 
-model Unit {
-  id      String  @id @default(uuid())
-  name    String
-  houseId String
-  house   House   @relation(fields: [houseId], references: [id])
-  meters  Meter[]
-  rent    Rent[]
-  floor   Int
+model Apartment {
+  id         String        @id @default(uuid())
+  name       String
+  buildingId String
+  building   Building      @relation(fields: [buildingId], references: [id])
+  meters     Meter[]
+  payments   Payment[]
+  costs      Cost[]
+  floor      Int
+  leases     Lease[]
+  type       ApartmentType
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 }
 
 model Meter {
-  id      String  @id @default(uuid())
-  type    String // e.g., "Water", "Electricity", "Gas"
-  unitId  String?
-  unit    Unit?   @relation(fields: [unitId], references: [id])
-  houseId String?
-  house   House?  @relation(fields: [houseId], references: [id])
+  id          String     @id @default(uuid())
+  type        String // e.g., "Water", "Electricity", "Gas"
+  value       Float?
+  unit        String // e.g., "kWh", "m3"
+  costPerUnit Float
+  apartmentId String?
+  apartment   Apartment? @relation(fields: [apartmentId], references: [id])
+  buildingId  String?
+  building    Building?  @relation(fields: [buildingId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
-model FixedCost {
-  id      String @id @default(uuid())
-  name    String
-  amount  Float
-  houseId String
-  house   House  @relation(fields: [houseId], references: [id])
+model Cost {
+  id          String       @id @default(uuid())
+  name        String
+  amount      Float
+  currency    Currency
+  type        CostType
+  interval    CostInterval
+  buildingId  String?
+  building    Building?    @relation(fields: [buildingId], references: [id])
+  apartmentId String?
+  apartment   Apartment?   @relation(fields: [apartmentId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
-model Rent {
-  id      String   @id @default(uuid())
-  amount  Float
-  dueDate DateTime
-  status  String // "pending" | "paid" | "overdue"
-  unitId  String
-  unit    Unit     @relation(fields: [unitId], references: [id])
+model Payment {
+  id          String      @id @default(uuid())
+  amount      Float
+  currency    Currency
+  dueDate     DateTime
+  status      String // "pending" | "paid" | "overdue"
+  type        PaymentType
+  apartmentId String
+  apartment   Apartment   @relation(fields: [apartmentId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Tenant {
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  phoneNumber String
+  leases      Lease[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Lease {
+  id          String    @id @default(uuid())
+  startDate   DateTime
+  endDate     DateTime?
+  rentAmount  Float
+  currency    Currency
+  apartmentId String
+  apartment   Apartment @relation(fields: [apartmentId], references: [id])
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }

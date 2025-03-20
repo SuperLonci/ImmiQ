@@ -108,6 +108,7 @@ model Cost {
   currency    Currency
   type        CostType
   interval    CostInterval
+  occurredAt  DateTime
   buildingId  String?
   building    Building?    @relation(fields: [buildingId], references: [id])
   apartmentId String?

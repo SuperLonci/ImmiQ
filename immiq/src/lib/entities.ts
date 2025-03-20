@@ -4,6 +4,8 @@ export interface User {
     password: string;
     name: string;
     buildings: Building[];
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface Building {
@@ -16,11 +18,15 @@ export interface Building {
     costs: Cost[];
     floors: number;
     meters: Meter[];
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface Apartment {
     id: string;
     name: string;
+    size: number;
+    sizeUnit: SizeUnit;
     buildingId: string;
     building: Building;
     meters: Meter[];
@@ -29,6 +35,8 @@ export interface Apartment {
     floor: number;
     leases: Lease[];
     type: ApartmentType;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface Meter {
@@ -41,6 +49,8 @@ export interface Meter {
     apartment?: Apartment;
     buildingId?: string;
     building?: Building;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface Cost {
@@ -50,10 +60,14 @@ export interface Cost {
     currency: Currency;
     type: CostType;
     interval: CostInterval;
+    biller: string;
+    occurredAt: Date;
     buildingId?: string;
     building?: Building;
     apartmentId?: string;
     apartment?: Apartment;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface Payment {
@@ -65,6 +79,8 @@ export interface Payment {
     type: PaymentType;
     apartmentId: string;
     apartment: Apartment;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface Tenant {
@@ -73,6 +89,8 @@ export interface Tenant {
     email: string;
     phoneNumber: string;
     leases: Lease[];
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface Lease {
@@ -85,12 +103,19 @@ export interface Lease {
     apartment: Apartment;
     tenantId: string;
     tenant: Tenant;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export enum Currency {
     EUR = 'EUR',
     USD = 'USD',
     GBP = 'GBP',
+}
+
+export enum SizeUnit {
+    SQM = 'SQM',
+    SQFT = 'SQFT',
 }
 
 export enum CostInterval {

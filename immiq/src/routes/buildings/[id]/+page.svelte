@@ -48,6 +48,10 @@
     function handleMeterClick(meterId: string) {
         goto(`/meters/${meterId}`);
     }
+
+    function handleCostClick(costId: string) {
+        goto(`/costs/${costId}`);
+    }
 </script>
 
 <style>
@@ -206,12 +210,13 @@
             {/if}
             {#if costs && costs.length > 0}
                 <div class="fixed-costs-list">
-                    <h3>Fixed Costs</h3>
+                    <h3>Costs</h3>
                     <ul>
                         {#each costs as cost}
                             <li>
                                 <button
                                         class="fixed-cost-button"
+                                        on:click={() => handleCostClick(cost.id)}
                                         aria-label="View details for {cost.name}"
                                 >
                                     <strong>{cost.name}</strong> - {cost.amount}

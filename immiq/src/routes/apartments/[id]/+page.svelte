@@ -2,9 +2,12 @@
     import {onMount} from 'svelte';
     import {page} from '$app/state';
     import {generateHouseGraphic} from '$lib/houseGraphic';
-    import type {Apartment} from '$lib/entities';
+    import type {Apartment, Meter, Cost, Payment, Tenant} from '$lib/entities';
 
     let apartment: Apartment;
+    let buildingMeters: Meter[] = [];
+    let buildingCosts: Cost[] = [];
+    let tenant: Tenant;
     $: apartmentId = page.params.id;
 
     onMount(async () => {
@@ -12,6 +15,9 @@
             const response = await fetch(`/api/apartments/${apartmentId}`);
             if (response.ok) {
                 apartment = await response.json();
+                buildingMeters = apartment.building.meters;
+                buildingCosts = apartment.building.costs;
+                tenant = apartment.leases[0]?.tenant;
             } else {
                 console.error('Failed to fetch apartment details');
             }
@@ -101,20 +107,51 @@
                 <p>Floor: {apartment.floor}</p>
             </div>
             <div class="apartment-details">
-                <h3>Meter Types</h3>
-                <ul>
-                    {#each apartment.meters as meter}
-                        <li>{meter.type}</li>
-                    {/each}
-                </ul>
+                <h3>Tenant</h3>
+                {#if tenant}
+                    <p>Name: {tenant.name}</p>
+                    <p>Email: {tenant.email}</p>
+                    <p>Phone: {tenant.phoneNumber}</p>
+                {:else}
+                    <p>No tenant information available</p>
+                {/if}
+
                 <h3>Rent Details</h3>
                 <ul>
                     {#each apartment.payments as rent}
                         <li>
-                            <p>Amount: ${rent.amount}</p>
+                            <p>Amount: {rent.amount} {rent.currency}</p>
                             <p>Due Date: {new Date(rent.dueDate).toLocaleDateString()}</p>
                             <p>Status: {rent.status}</p>
                         </li>
+                    {/each}
+                </ul>
+
+                <h3>Apartment Meters</h3>
+                <ul>
+                    {#each apartment.meters as meter}
+                        <li>{meter.type} - {meter.value} {meter.unit}</li>
+                    {/each}
+                </ul>
+
+                <h3>Apartment Costs</h3>
+                <ul>
+                    {#each apartment.costs as cost}
+                        <li>{cost.name} - {cost.amount} {cost.currency}</li>
+                    {/each}
+                </ul>
+
+                <h3>Building Meters</h3>
+                <ul>
+                    {#each buildingMeters as meter}
+                        <li>{meter.type} - {meter.value} {meter.unit}</li>
+                    {/each}
+                </ul>
+
+                <h3>Building Costs</h3>
+                <ul>
+                    {#each buildingCosts as cost}
+                        <li>{cost.name} - {cost.amount} {cost.currency}</li>
                     {/each}
                 </ul>
             </div>

@@ -2,7 +2,7 @@
     import {onMount} from 'svelte';
     import {page} from '$app/state';
     import {generateHouseGraphic} from '$lib/houseGraphic';
-    import type {Apartment, Meter, Cost, Payment, Tenant} from '$lib/entities';
+    import type {Apartment, Meter, Cost, Tenant} from '$lib/entities';
 
     let apartment: Apartment;
     let buildingMeters: Meter[] = [];

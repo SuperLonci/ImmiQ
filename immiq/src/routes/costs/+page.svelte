@@ -1,6 +1,5 @@
 <script lang="ts">
     import {onMount} from 'svelte';
-    import {page} from '$app/state';
     import type {Cost} from '$lib/entities';
     import {goto} from "$app/navigation";
 
@@ -41,8 +40,9 @@
         display: block;
     }
 
-    .cost-details p {
+    .cost-details span {
         margin: 5px 0;
+        display: block;
     }
 </style>
 
@@ -55,9 +55,9 @@
                     {cost.name}
                 </span>
                 <span class="cost-details">
-                    <p><strong>Amount:</strong> {cost.amount} {cost.currency}</p>
-                    <p><strong>Interval:</strong> {cost.interval}</p>
-                    <p><strong>Occurred At:</strong> {cost.interval}</p>
+                    <span><strong>Amount:</strong> {cost.amount} {cost.currency}</span>
+                    <span><strong>Interval:</strong> {cost.interval}</span>
+                    <span><strong>Occurred At:</strong> {cost.interval}</span>
                 </span>
             </button>
         </li>

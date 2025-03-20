@@ -116,7 +116,22 @@
                     <p>No tenant information available</p>
                 {/if}
 
-                <h3>Rent Details</h3>
+                <h3>General Rent Information</h3>
+                <p>Size: {apartment.size} {apartment.sizeUnit}</p>
+                <h4>Base Rent</h4>
+                <ul>
+                    {#each apartment.costs.filter(cost => cost.type === 'BASE_RENT') as cost}
+                        <li>{cost.name} - {cost.amount} {cost.currency}</li>
+                    {/each}
+                </ul>
+                <h4>Service Charge</h4>
+                <ul>
+                    {#each apartment.costs.filter(cost => cost.type === 'SERVICE_CHARGE') as cost}
+                        <li>{cost.name} - {cost.amount} {cost.currency}</li>
+                    {/each}
+                </ul>
+
+                <h3>Payment Details</h3>
                 <ul>
                     {#each apartment.payments as rent}
                         <li>

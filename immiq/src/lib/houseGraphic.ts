@@ -43,15 +43,26 @@ export function generateHouseGraphic(floors: number, apartments: Apartment[] = [
                             height="${floorHeight}"
                             style="fill:${apartmentColor};stroke:black;stroke-width:${strokeWidth};cursor:pointer" />`;
 
-                // Format apartment name to fit in two lines if needed
+                // Format apartment name
                 let apartmentName = apartment.name || 'Unit';
 
-                // If the name is long, split it into two lines
-                if (apartmentName.length > 8) {
-                    // Split approximately in half
-                    const midpoint = Math.ceil(apartmentName.length / 2);
-                    const firstLine = apartmentName.substring(0, midpoint);
-                    const secondLine = apartmentName.substring(midpoint);
+                // Calculate approximate max characters that can fit
+                // Assuming each character takes about 10px width for a 16px font
+                const maxCharsPerLine = Math.floor((apartmentWidth - 10) / 10);
+
+                // Only split if name is longer than what can fit on a single line
+                if (apartmentName.length > maxCharsPerLine) {
+                    // Find a good splitting point - try to split at a space if possible
+                    let splitPoint = maxCharsPerLine;
+
+                    // Try to find a space to split at
+                    const lastSpaceIndex = apartmentName.substring(0, maxCharsPerLine).lastIndexOf(' ');
+                    if (lastSpaceIndex > 0) {
+                        splitPoint = lastSpaceIndex;
+                    }
+
+                    const firstLine = apartmentName.substring(0, splitPoint);
+                    const secondLine = apartmentName.substring(splitPoint).trim();
 
                     svgContent += `
                             <text
@@ -71,7 +82,7 @@ export function generateHouseGraphic(floors: number, apartments: Apartment[] = [
                                 font-weight="bold"
                                 style="pointer-events:none">${secondLine}</text>`;
                 } else {
-                    // If name is short, just one line centered
+                    // If name fits on one line, just center it
                     svgContent += `
                             <text
                                 x="${x + apartmentWidth / 2}"

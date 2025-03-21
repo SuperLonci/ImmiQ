@@ -22,40 +22,40 @@ export function generateHouseGraphic(floors: number, apartments: Apartment[] = [
         svgContent += `<rect x="0" y="${y}" width="${floorWidth}" height="${floorHeight}" style="fill:${backgroundColor};stroke:black;stroke-width:${strokeWidth}" />`;
 
         // Get apartments for this floor
-        const apartmentsOnFloor = apartments.filter(unit => unit.floor === floorNumber);
+        const apartmentsOnFloor = apartments.filter(apartment => apartment.floor === floorNumber);
 
         if (apartmentsOnFloor.length > 0) {
-            const unitWidth = floorWidth / apartmentsOnFloor.length;
+            const apartmentWidth = floorWidth / apartmentsOnFloor.length;
 
             // Add apartments
-            apartmentsOnFloor.forEach((unit, index) => {
-                const x = index * unitWidth;
-                // Get color based on overall unit index, not per floor
-                const unitIndex = apartments.findIndex(u => u.id === unit.id);
-                const unitColor = getUnitColor(unitIndex);
+            apartmentsOnFloor.forEach((apartment, index) => {
+                const x = index * apartmentWidth;
+                // Get color based on overall apartment index, not per floor
+                const apartmentIndex = apartments.findIndex(u => u.id === apartment.id);
+                const apartmentColor = getUnitColor(apartmentIndex);
 
-                // Create unit rectangle with thick border
-                svgContent += `<g class="unit-group" data-unit-id="${unit.id}">
+                // Create apartment rectangle with thick border
+                svgContent += `<g class="apartment-group" data-apartment-id="${apartment.id}">
                         <rect
                             x="${x}"
                             y="${y}"
-                            width="${unitWidth}"
+                            width="${apartmentWidth}"
                             height="${floorHeight}"
-                            style="fill:${unitColor};stroke:black;stroke-width:${strokeWidth};cursor:pointer" />`;
+                            style="fill:${apartmentColor};stroke:black;stroke-width:${strokeWidth};cursor:pointer" />`;
 
-                // Format unit name to fit in two lines if needed
-                let unitName = unit.name || 'Unit';
+                // Format apartment name to fit in two lines if needed
+                let apartmentName = apartment.name || 'Unit';
 
                 // If the name is long, split it into two lines
-                if (unitName.length > 8) {
+                if (apartmentName.length > 8) {
                     // Split approximately in half
-                    const midpoint = Math.ceil(unitName.length / 2);
-                    const firstLine = unitName.substring(0, midpoint);
-                    const secondLine = unitName.substring(midpoint);
+                    const midpoint = Math.ceil(apartmentName.length / 2);
+                    const firstLine = apartmentName.substring(0, midpoint);
+                    const secondLine = apartmentName.substring(midpoint);
 
                     svgContent += `
                             <text
-                                x="${x + unitWidth / 2}"
+                                x="${x + apartmentWidth / 2}"
                                 y="${y + floorHeight / 2 - 10}"
                                 alignment-baseline="middle"
                                 text-anchor="middle"
@@ -63,7 +63,7 @@ export function generateHouseGraphic(floors: number, apartments: Apartment[] = [
                                 font-weight="bold"
                                 style="pointer-events:none">${firstLine}</text>
                             <text
-                                x="${x + unitWidth / 2}"
+                                x="${x + apartmentWidth / 2}"
                                 y="${y + floorHeight / 2 + 10}"
                                 alignment-baseline="middle"
                                 text-anchor="middle"
@@ -74,13 +74,13 @@ export function generateHouseGraphic(floors: number, apartments: Apartment[] = [
                     // If name is short, just one line centered
                     svgContent += `
                             <text
-                                x="${x + unitWidth / 2}"
+                                x="${x + apartmentWidth / 2}"
                                 y="${y + floorHeight / 2}"
                                 alignment-baseline="middle"
                                 text-anchor="middle"
                                 font-size="16"
                                 font-weight="bold"
-                                style="pointer-events:none">${unitName}</text>`;
+                                style="pointer-events:none">${apartmentName}</text>`;
                 }
 
                 svgContent += `</g>`;

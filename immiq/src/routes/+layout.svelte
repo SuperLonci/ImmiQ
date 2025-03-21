@@ -6,6 +6,8 @@
         {name: 'Apartments', path: '/apartments'},
         {name: 'Meters', path: '/meters'},
         {name: 'Costs', path: '/costs'},
+        {name: 'Leases', path: '/leases'},
+        {name: 'Tenants', path: '/tenants'},
     ];
 
     let isSidebarCollapsed = false;

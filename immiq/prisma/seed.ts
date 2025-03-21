@@ -46,6 +46,8 @@ async function main() {
             buildingId: building1.id,
             floor: 0,
             type: 'APARTMENT',
+            size: 50,
+            sizeUnit: 'SQM',
         },
     });
 
@@ -55,6 +57,8 @@ async function main() {
             buildingId: building1.id,
             floor: 1,
             type: 'APARTMENT',
+            size: 75,
+            sizeUnit: 'SQM',
         },
     });
 
@@ -64,6 +68,8 @@ async function main() {
             buildingId: building1.id,
             floor: 1,
             type: 'APARTMENT',
+            size: 80,
+            sizeUnit: 'SQM',
         },
     });
 
@@ -73,6 +79,8 @@ async function main() {
             buildingId: building2.id,
             floor: 0,
             type: 'APARTMENT',
+            size: 60,
+            sizeUnit: 'SQM',
         },
     });
 
@@ -103,6 +111,8 @@ async function main() {
             currency: 'USD',
             type: 'SERVICE_CHARGE',
             interval: 'MONTHLY',
+            biller: 'Maintenance Company',
+            occurredAt: new Date(),
             buildingId: building1.id,
         },
     });
@@ -114,6 +124,8 @@ async function main() {
             currency: 'EUR',
             type: 'SERVICE_CHARGE',
             interval: 'YEARLY',
+            biller: 'Security Company',
+            occurredAt: new Date(),
             buildingId: building2.id,
         },
     });
@@ -149,6 +161,44 @@ async function main() {
             status: 'pending',
             type: 'ADDITIONAL_PAYMENT',
             apartmentId: apartment1.id,
+        },
+    });
+
+    // Create Tenants
+    const tenant1 = await prisma.tenant.create({
+        data: {
+            name: 'Tenant One',
+            email: 'tenant1@example.com',
+            phoneNumber: '123-456-7890',
+        },
+    });
+
+    const tenant2 = await prisma.tenant.create({
+        data: {
+            name: 'Tenant Two',
+            email: 'tenant2@example.com',
+            phoneNumber: '098-765-4321',
+        },
+    });
+
+    // Create Leases
+    const lease1 = await prisma.lease.create({
+        data: {
+            startDate: new Date('2023-01-01'),
+            rentAmount: 1200.0,
+            currency: 'USD',
+            apartmentId: apartment1.id,
+            tenantId: tenant1.id,
+        },
+    });
+
+    const lease2 = await prisma.lease.create({
+        data: {
+            startDate: new Date('2023-02-01'),
+            rentAmount: 1500.0,
+            currency: 'USD',
+            apartmentId: apartment2.id,
+            tenantId: tenant2.id,
         },
     });
 }

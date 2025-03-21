@@ -1,6 +1,7 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import {page} from '$app/state';
+    import {goto} from '$app/navigation';
     import {generateHouseGraphic} from '$lib/houseGraphic';
     import type {Apartment, Meter, Cost, Tenant} from '$lib/entities';
 
@@ -25,6 +26,10 @@
             console.error('Error fetching apartment details:', error);
         }
     });
+
+    function goBack() {
+        goto('/apartments');
+    }
 </script>
 
 <style>
@@ -85,10 +90,28 @@
         border-radius: 4px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
+    .back-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 24px;
+        color: #333;
+        margin-right: 10px;
+        border-radius: 4px;
+    }
+
+    .back-button:hover {
+        color: #000;
+        background-color: #dad6d6;
+    }
 </style>
 
 {#if apartment}
     <div class="apartment-container">
+        <div class="header">
+            <button on:click={goBack} class="back-button">&#8592;</button>
+        </div>
         <div class="house-graphic-container">
             <svg
                     width="220"

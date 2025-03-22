@@ -7,9 +7,10 @@ We appreciate your contribution and feedback as we improve.
 
 We’d love your help! Whether it’s fixing bugs, adding new features, or improving documentation, your contributions are welcome.
 
+[Contributing Guide](CONTRIBUTING.md)
+
 👉 **Check out our [issues](https://github.com/SuperLonci/ImmiQ/issues) to get started.**  
 💡 If you have any questions, feel free to open a discussion or reach out!
-
 
 # ImmiQ
 

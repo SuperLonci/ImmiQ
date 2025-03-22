@@ -1,15 +1,15 @@
-# 🚧 Project in Development 🚧  
+# 🚧 Project in Development 🚧
 
-⚠️ **This project is still in development!** Expect changes, bugs, and work-in-progress features. 
-We appreciate your contribution and feedback as we improve.  
+⚠️ **This project is still in development!** Expect changes, bugs, and work-in-progress features.
+We appreciate your contribution and feedback as we improve.
 
 ## 🚀 Looking for Contributors!
 
-We’d love your help! Whether it’s fixing bugs, adding new features, or improving documentation, your contributions are welcome.
+We’d love your help! Whether it’s fixing bugs, adding new features, or improving documentation, your contributions are
+welcome.
 
 👉 **Check out our [issues](https://github.com/SuperLonci/ImmiQ/issues) to get started.**  
 💡 If you have any questions, feel free to open a discussion or reach out!
-
 
 # ImmiQ
 
@@ -80,4 +80,15 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 ## License
 
-tbd
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+
+This work is licensed under a
+[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
+
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+
+[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+
+[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
+
+[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg

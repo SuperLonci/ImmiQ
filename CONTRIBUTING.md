@@ -37,7 +37,8 @@ Open http://localhost:5173 in your browser.
    Always create a new branch for your contribution: 
    ```sh
    git checkout -b feature/your-feature-name
-Use descriptive branch names like fix/readme-typo or feature/add-login.
+   ```
+   Use descriptive branch names like fix/readme-typo or feature/add-login.
 3. **Writing Code** 
    Follow project conventions and coding standards.
    Use Prettier for consistent formatting.   

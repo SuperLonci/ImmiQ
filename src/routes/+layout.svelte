@@ -1,5 +1,6 @@
 <script lang="ts">
     import "../app.css";
+    import Footer from "../components/Footer.svelte";
 
     let menuItems = [
         {name: 'Buildings', path: '/buildings'},
@@ -76,5 +77,8 @@
         <main class="flex-1 p-6 overflow-y-auto main-content">
             <slot/>
         </main>
+
+        <!-- Footer Component -->
+        <Footer/>
     </div>
 </div>

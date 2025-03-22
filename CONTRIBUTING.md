@@ -4,7 +4,8 @@
 
 ## 🛠️ Setting Up the Project
 
-1. **Fork the Repository** – Click the fork button to create your own copy.  
+1. **Fork the Repository**
+   Click the fork button to create your own copy.  
 2. **Clone Your Fork**  
    ```sh
    git clone https://github.com/your-username/ImmiQ.git
@@ -23,7 +24,8 @@
 5. **Install Dependencies**  
    ```sh
    npm install
-Open http://localhost:5173 in your browser.
+   ```
+   Open http://localhost:5173 in your browser.
 
 ## 🔄 Contribution Workflow
 
@@ -48,11 +50,13 @@ Open http://localhost:5173 in your browser.
    feat: Added login feature
    fix: Resolved bug in user authentication
    docs: Updated README with installation steps
+   ```
 
    Commit your changes:
    ```sh
    git add .
    git commit -m "your commit message"
+   ```
 5. **Pushing Your Changes** 
     ```sh
    git push origin feature/your-feature-name

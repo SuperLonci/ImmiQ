@@ -1,29 +1,28 @@
 import {PrismaClient} from '@prisma/client';
-import type {RequestEvent} from '@sveltejs/kit';
 
 const prisma = new PrismaClient();
 
-export async function GET(event: RequestEvent) {
+export async function GET() {
     try {
-        const meters = await prisma.meter.findMany({
+        const leases = await prisma.lease.findMany({
             include: {
-                building: {
+                apartment: {
                     select: {
                         name: true
                     }
                 },
-                apartment: {
+                tenant: {
                     select: {
                         name: true
                     }
                 }
             }
         });
-        return new Response(JSON.stringify(meters), {
+        return new Response(JSON.stringify(leases), {
             headers: {'Content-Type': 'application/json'},
         });
     } catch (error) {
-        return new Response(JSON.stringify({error: 'Failed to fetch meters'}), {
+        return new Response(JSON.stringify({error: 'Failed to fetch leases'}), {
             status: 500,
             headers: {'Content-Type': 'application/json'},
         });

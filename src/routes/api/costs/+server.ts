@@ -1,9 +1,8 @@
 import {PrismaClient} from '@prisma/client';
-import type {RequestEvent} from '@sveltejs/kit';
 
 const prisma = new PrismaClient();
 
-export async function GET(event: RequestEvent) {
+export async function GET() {
     try {
         const costs = await prisma.cost.findMany({
             include: {}

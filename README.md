@@ -1,3 +1,11 @@
+# 🚀 Looking for Contributors!
+
+We’d love your help! Whether it’s fixing bugs, adding new features, or improving documentation, your contributions are welcome.
+
+👉 **Check out our [issues](https://github.com/SuperLonci/ImmiQ/issues) to get started.**  
+💡 If you have any questions, feel free to open a discussion or reach out!
+
+
 # ImmiQ
 
 A smart and efficient property and tenant management application.

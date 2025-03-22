@@ -60,3 +60,18 @@ button:hover {
     background-color: #f0f0f0; /* Light grey background on hover */
     color: #333; /* Dark text color on hover */
 }
+
+.back-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    color: #333;
+    margin-right: 10px;
+    border-radius: 4px;
+}
+
+.back-button:hover {
+    color: #000;
+    background-color: #dad6d6;
+}

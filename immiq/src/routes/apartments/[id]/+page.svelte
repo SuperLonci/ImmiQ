@@ -91,20 +91,6 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .back-button {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 24px;
-        color: #333;
-        margin-right: 10px;
-        border-radius: 4px;
-    }
-
-    .back-button:hover {
-        color: #000;
-        background-color: #dad6d6;
-    }
 </style>
 
 {#if apartment}

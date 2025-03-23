@@ -1,9 +1,13 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import {page} from '$app/state';
+    import DetailView from '../../../components/DetailView.svelte';
+    import DetailSection from '../../../components/DetailSection.svelte';
+    import DetailItem from '../../../components/DetailItem.svelte';
     import type {Cost} from '$lib/entities';
 
     let cost: Cost;
+    let loading = true;
     $: costId = page.params.id;
 
     onMount(async () => {
@@ -16,48 +20,20 @@
             }
         } catch (error) {
             console.error('Error fetching cost details:', error);
+        } finally {
+            loading = false;
         }
     });
 </script>
 
-<style>
-    .cost-container {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 20px;
-        padding: 20px;
-        background-color: #f9f9f9;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        max-width: 800px;
-        margin: 0 auto;
-    }
-
-    .cost-header {
-        text-align: left;
-        margin-bottom: 20px;
-    }
-
-    .cost-details p {
-        margin: 10px 0;
-        font-size: 16px;
-    }
-</style>
-
-{#if cost}
-    <div class="cost-container">
-        <div class="cost-header">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Cost Details</h2>
-        </div>
-        <div class="cost-details">
-            <p><strong>Description:</strong> {cost.name}</p>
-            <p><strong>Amount:</strong> {cost.amount} {cost.currency}</p>
-            <p><strong>Interval:</strong> {cost.interval}</p>
-        </div>
-    </div>
-{:else}
-    <div class="flex justify-center items-center h-64">
-        <p>Loading cost details...</p>
-    </div>
-{/if}
+<DetailView
+        title="Cost Details"
+        backUrl="/costs"
+        loading={loading}
+>
+    <DetailSection title="Cost Information">
+        <DetailItem label="Description">{cost?.name}</DetailItem>
+        <DetailItem label="Amount">{cost?.amount} {cost?.currency}</DetailItem>
+        <DetailItem label="Interval">{cost?.interval}</DetailItem>
+    </DetailSection>
+</DetailView>

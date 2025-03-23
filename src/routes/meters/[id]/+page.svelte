@@ -1,9 +1,13 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import {page} from '$app/state';
+    import DetailView from '../../../components/DetailView.svelte';
+    import DetailSection from '../../../components/DetailSection.svelte';
+    import DetailItem from '../../../components/DetailItem.svelte';
     import type {Meter} from '$lib/entities';
 
     let meter: Meter;
+    let loading = true;
     $: meterId = page.params.id;
 
     onMount(async () => {
@@ -16,48 +20,20 @@
             }
         } catch (error) {
             console.error('Error fetching meter details:', error);
+        } finally {
+            loading = false;
         }
     });
 </script>
 
-<style>
-    .meter-container {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 20px;
-        padding: 20px;
-        background-color: #f9f9f9;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        max-width: 800px;
-        margin: 0 auto;
-    }
-
-    .meter-header {
-        text-align: left;
-        margin-bottom: 20px;
-    }
-
-    .meter-details p {
-        margin: 10px 0;
-        font-size: 16px;
-    }
-</style>
-
-{#if meter}
-    <div class="meter-container">
-        <div class="meter-header">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Meter Details</h2>
-        </div>
-        <div class="meter-details">
-            <p><strong>Type:</strong> {meter.type}</p>
-            <p><strong>House ID:</strong> {meter.buildingId || 'N/A'}</p>
-            <p><strong>Unit ID:</strong> {meter.apartmentId || 'N/A'}</p>
-        </div>
-    </div>
-{:else}
-    <div class="flex justify-center items-center h-64">
-        <p>Loading meter details...</p>
-    </div>
-{/if}
+<DetailView
+        title="Meter Details"
+        backUrl="/meters"
+        loading={loading}
+>
+    <DetailSection title="Meter Information">
+        <DetailItem label="Type">{meter?.type}</DetailItem>
+        <DetailItem label="House ID">{meter?.buildingId || 'N/A'}</DetailItem>
+        <DetailItem label="Unit ID">{meter?.apartmentId || 'N/A'}</DetailItem>
+    </DetailSection>
+</DetailView>

@@ -5,7 +5,7 @@ We appreciate your contribution and feedback as we improve.
 
 ## 🚀 Looking for Contributors!
 
-We’d love your help! Whether it’s fixing bugs, adding new features, or improving documentation, your contributions are welcome.
+We'd love your help! Whether it's fixing bugs, adding new features, or improving documentation, your contributions are welcome.
 
 👉 **Check out our [issues](https://github.com/SuperLonci/ImmiQ/issues) to get started.**  
 💡 If you have any questions, feel free to open a discussion or reach out!
@@ -76,7 +76,7 @@ Built for simplicity and scalability, it ensures seamless real estate management
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request for any changes.
+We welcome contributions! Please read our [Contributing Guide](ContributingGuide.md) to learn about our development process, how to propose bug fixes and improvements, and how to build and test your changes.
 
 ## License
 

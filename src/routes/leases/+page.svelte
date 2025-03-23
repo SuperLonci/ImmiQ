@@ -1,9 +1,11 @@
 <script lang="ts">
     import {onMount} from 'svelte';
-    import {goto} from '$app/navigation';
+    import EntityList from '../../components/EntityList.svelte';
     import type {Lease} from '$lib/entities';
 
     let leases: Lease[] = [];
+    let loading: boolean = true;
+    let showDetailed: boolean = false;
 
     onMount(async () => {
         try {
@@ -15,21 +17,22 @@
             }
         } catch (error) {
             console.error('Error fetching leases:', error);
+        } finally {
+            loading = false;
         }
     });
-
-    function viewLeaseDetails(id: string) {
-        goto(`/leases/${id}`);
-    }
 </script>
 
-<h2 class="text-2xl font-bold text-gray-800 mb-4">Leases</h2>
-<ul class="space-y-2">
-    {#each leases as lease}
-        <li>
-            <button class="list-item-button" on:click={() => viewLeaseDetails(lease.id)}>
-                {lease.apartment?.name || 'N/A'} - {lease.tenant?.name || 'N/A'}
-            </button>
-        </li>
-    {/each}
-</ul>
+<EntityList
+        title="Leases"
+        items={leases}
+        loading={loading}
+        basePath="/leases"
+        displayProperty=""
+        emptyMessage="No leases available"
+        bind:detailed={showDetailed}
+>
+    <svelte:fragment slot="item-content" let:item>
+        <span>{item.apartment.name}: {item.tenant.name}</span>
+    </svelte:fragment>
+</EntityList>

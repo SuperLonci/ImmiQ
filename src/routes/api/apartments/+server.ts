@@ -4,7 +4,9 @@ const prisma = new PrismaClient();
 
 export async function GET() {
     try {
-        const apartments = await prisma.apartment.findMany();
+        const apartments = await prisma.apartment.findMany({
+            include: {building: true},
+        });
         return new Response(JSON.stringify(apartments), {
             headers: {'Content-Type': 'application/json'},
         });

@@ -1,7 +1,7 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import EntityList from '../../components/EntityList.svelte';
-    import {type Apartment, apartmentSchema, buildingSchema} from '$lib/entities';
+    import {type Apartment, apartmentSchema} from '$lib/entities';
 
     let apartments: Apartment[] = [];
     let loading: boolean = true;

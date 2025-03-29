@@ -2,7 +2,9 @@
     import {goto} from '$app/navigation';
     import ListItem from './ListItem.svelte';
     import ListItemDetail from './ListItemDetail.svelte';
+    import EntityForm from './EntityForm.svelte';
 
+    // Original EntityList props
     export let title: string;
     export let items: any[] = [];
     export let loading: boolean = false;
@@ -10,15 +12,90 @@
     export let displayProperty: string = 'name';
     export let emptyMessage: string = 'No items available';
     export let showAddButton: boolean = true;
-    export let addButtonPath: string = `${basePath}/new`;
     export let detailed: boolean = false;
+    export let schema: Array<{
+        name: string;
+        type: 'text' | 'number' | 'select' | 'date' | 'boolean';
+        label: string;
+        required: boolean;
+        options?: string[];
+        defaultValue?: any;
+    }> = []; // Schema provided by the page component
+
+    // Form state
+    let showForm = false;
+    let isEditing = false;
+    let currentItem: any = {};
+
+    // Get entity type from basePath
+    $: entityType = basePath.split('/').filter(p => p).pop() || '';
+    $: entityName = entityType.replace(/s$/, ''); // Remove trailing 's' for singular form
 
     function viewDetails(id: string) {
         goto(`${basePath}/${id}`);
     }
 
     function handleAddNew() {
-        goto(addButtonPath);
+        isEditing = false;
+        currentItem = {};
+        showForm = true;
+    }
+
+    function handleEditItem(item: any) {
+        isEditing = true;
+        currentItem = {...item};
+        showForm = true;
+    }
+
+    async function handleFormSubmit(event: CustomEvent) {
+        const {data, isEditing} = event.detail;
+
+        try {
+            const endpoint = `/api${basePath}${isEditing ? `/${data.id}` : ''}`;
+            const method = isEditing ? 'PUT' : 'POST';
+
+            const response = await fetch(endpoint, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                // Refresh the data
+                await fetchItems();
+                // Close form after successful submission
+                showForm = false;
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('An unexpected error occurred');
+        }
+    }
+
+    function handleFormError(event: CustomEvent) {
+        alert(event.detail.message);
+    }
+
+    // Fetch items function for refreshing after form submit
+    async function fetchItems() {
+        try {
+            loading = true;
+            const response = await fetch(`/api${basePath}`);
+            if (response.ok) {
+                items = await response.json();
+            } else {
+                console.error(`Failed to fetch ${entityType}`);
+            }
+        } catch (error) {
+            console.error(`Error fetching ${entityType}:`, error);
+        } finally {
+            loading = false;
+        }
     }
 </script>
 
@@ -35,12 +112,6 @@
             {#if showAddButton}
                 <button on:click={handleAddNew} class="add-button" aria-label="Add new">
                     +
-                    <!--                 ToDo: evaluate why the svg doesnt get shown-->
-                    <!--                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"-->
-                    <!--                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">-->
-                    <!--                        <line x1="12" y1="5" x2="12" y2="19"></line>-->
-                    <!--                        <line x1="5" y1="12" x2="19" y2="12"></line>-->
-                    <!--                    </svg>-->
                 </button>
             {/if}
         </div>
@@ -56,11 +127,21 @@
         <ul class="entity-list">
             {#each items as item (item.id)}
                 {#if detailed}
-                    <ListItemDetail {item} {displayProperty} on:click={() => viewDetails(item.id)}>
+                    <ListItemDetail
+                            {item}
+                            {displayProperty}
+                            on:click={() => viewDetails(item.id)}
+                            on:edit={() => handleEditItem(item)}
+                    >
                         <slot name="item-content" {item}></slot>
                     </ListItemDetail>
                 {:else}
-                    <ListItem {item} {displayProperty} on:click={() => viewDetails(item.id)}>
+                    <ListItem
+                            {item}
+                            {displayProperty}
+                            on:click={() => viewDetails(item.id)}
+                            on:edit={() => handleEditItem(item)}
+                    >
                         <slot name="item-content" {item}></slot>
                     </ListItem>
                 {/if}
@@ -68,6 +149,18 @@
         </ul>
     {/if}
 </div>
+
+<!-- Popup form component -->
+<EntityForm
+        entityType={entityName}
+        {schema}
+        initialData={currentItem}
+        isOpen={showForm}
+        isEditing={isEditing}
+        on:close={() => showForm = false}
+        on:submit={handleFormSubmit}
+        on:error={handleFormError}
+/>
 
 <style>
     .entity-list-container {

@@ -1,7 +1,7 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import EntityList from '../../components/EntityList.svelte';
-    import type {Tenant} from '$lib/entities';
+    import {buildingSchema, type Tenant, tenantSchema} from '$lib/entities';
 
     let tenants: Tenant[] = [];
     let loading: boolean = true;
@@ -31,6 +31,8 @@
         displayProperty="name"
         emptyMessage="No tenants available"
         bind:detailed={showDetailed}
+        showAddButton={true}
+        schema={tenantSchema}
 >
     <svelte:fragment slot="item-content" let:item>
         <span></span>

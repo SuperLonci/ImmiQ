@@ -1,7 +1,7 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import EntityList from '../../components/EntityList.svelte';
-    import type {Cost} from '$lib/entities';
+    import {buildingSchema, type Cost, costSchema} from '$lib/entities';
 
     let costs: Cost[] = [];
     let loading: boolean = true;
@@ -31,6 +31,8 @@
         displayProperty="name"
         emptyMessage="No costs available"
         bind:detailed={showDetailed}
+        showAddButton={true}
+        schema={costSchema}
 >
     <svelte:fragment slot="item-content" let:item>
         <span>: {item.amount} {item.currency}</span>

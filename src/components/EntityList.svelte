@@ -68,8 +68,16 @@
                 // Close form after successful submission
                 showForm = false;
             } else {
-                const errorData = await response.json();
-                alert(`Error: ${errorData.message || 'Unknown error'}`);
+                // More robust error handling
+                let errorMessage = 'Unknown error occurred';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch (jsonError) {
+                    // If response isn't valid JSON, use status text
+                    errorMessage = response.statusText || errorMessage;
+                }
+                alert(`Error: ${errorMessage}`);
             }
         } catch (error) {
             console.error('Error submitting form:', error);

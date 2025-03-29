@@ -147,24 +147,28 @@ export enum ApartmentType {
     PENTHOUSE = 'PENTHOUSE',
 }
 
-// Form schema definitions for each entity type
+// Enhanced Form field schema to include relationship fields
 export type FormFieldSchema = {
     name: string;
-    type: 'text' | 'number' | 'select' | 'date' | 'boolean';
+    type: 'text' | 'number' | 'select' | 'date' | 'boolean' | 'entity-select';
     label: string;
     required: boolean;
     options?: string[];
     defaultValue?: any;
+    entityType?: string; // For entity-select fields, specifies what entity type to fetch
+    displayProperty?: string; // For entity-select fields, which property to display
+    relationship?: 'one-to-one' | 'one-to-many'; // Type of relationship
+    mutuallyExclusiveWith?: string[]; // For fields that can't be used together
 };
 
-// Building schema
+// Building schema (no required dependencies)
 export const buildingSchema: FormFieldSchema[] = [
     {name: 'name', type: 'text', label: 'Building Name', required: true},
     {name: 'address', type: 'text', label: 'Address', required: true},
     {name: 'floors', type: 'number', label: 'Number of Floors', required: true}
 ];
 
-// Apartment schema
+// Apartment schema (requires a building)
 export const apartmentSchema: FormFieldSchema[] = [
     {name: 'name', type: 'text', label: 'Apartment Name', required: true},
     {name: 'size', type: 'number', label: 'Size', required: true},
@@ -174,6 +178,15 @@ export const apartmentSchema: FormFieldSchema[] = [
         label: 'Size Unit',
         options: Object.values(SizeUnit),
         required: true
+    },
+    {
+        name: 'buildingId',
+        type: 'entity-select',
+        label: 'Building',
+        required: true,
+        entityType: 'buildings',
+        displayProperty: 'name',
+        relationship: 'one-to-one'
     },
     {name: 'floor', type: 'number', label: 'Floor Number', required: true},
     {
@@ -185,7 +198,7 @@ export const apartmentSchema: FormFieldSchema[] = [
     }
 ];
 
-// Cost schema
+// Cost schema (requires either a building OR an apartment, not both)
 export const costSchema: FormFieldSchema[] = [
     {name: 'name', type: 'text', label: 'Cost Name', required: true},
     {name: 'amount', type: 'number', label: 'Amount', required: true},
@@ -211,10 +224,30 @@ export const costSchema: FormFieldSchema[] = [
         required: true
     },
     {name: 'biller', type: 'text', label: 'Biller', required: true},
-    {name: 'occurredAt', type: 'date', label: 'Date Occurred', required: true}
+    {name: 'occurredAt', type: 'date', label: 'Date Occurred', required: true},
+    {
+        name: 'buildingId',
+        type: 'entity-select',
+        label: 'Building',
+        required: false,
+        entityType: 'buildings',
+        displayProperty: 'name',
+        relationship: 'one-to-one',
+        mutuallyExclusiveWith: ['apartmentId']
+    },
+    {
+        name: 'apartmentId',
+        type: 'entity-select',
+        label: 'Apartment',
+        required: false,
+        entityType: 'apartments',
+        displayProperty: 'name',
+        relationship: 'one-to-one',
+        mutuallyExclusiveWith: ['buildingId']
+    }
 ];
 
-// Payment schema
+// Payment schema (requires an apartment)
 export const paymentSchema: FormFieldSchema[] = [
     {name: 'amount', type: 'number', label: 'Amount', required: true},
     {
@@ -232,17 +265,26 @@ export const paymentSchema: FormFieldSchema[] = [
         label: 'Payment Type',
         options: Object.values(PaymentType),
         required: true
+    },
+    {
+        name: 'apartmentId',
+        type: 'entity-select',
+        label: 'Apartment',
+        required: true,
+        entityType: 'apartments',
+        displayProperty: 'name',
+        relationship: 'one-to-one'
     }
 ];
 
-// Tenant schema
+// Tenant schema (no required dependencies)
 export const tenantSchema: FormFieldSchema[] = [
     {name: 'name', type: 'text', label: 'Tenant Name', required: true},
     {name: 'email', type: 'text', label: 'Email', required: true},
     {name: 'phoneNumber', type: 'text', label: 'Phone Number', required: true}
 ];
 
-// Lease schema
+// Lease schema (requires an apartment and a tenant)
 export const leaseSchema: FormFieldSchema[] = [
     {name: 'startDate', type: 'date', label: 'Start Date', required: true},
     {name: 'endDate', type: 'date', label: 'End Date', required: false},
@@ -253,15 +295,53 @@ export const leaseSchema: FormFieldSchema[] = [
         label: 'Currency',
         options: Object.values(Currency),
         required: true
+    },
+    {
+        name: 'apartmentId',
+        type: 'entity-select',
+        label: 'Apartment',
+        required: true,
+        entityType: 'apartments',
+        displayProperty: 'name',
+        relationship: 'one-to-one'
+    },
+    {
+        name: 'tenantId',
+        type: 'entity-select',
+        label: 'Tenant',
+        required: true,
+        entityType: 'tenants',
+        displayProperty: 'name',
+        relationship: 'one-to-one'
     }
 ];
 
-// Meter schema
+// Meter schema (requires either a building OR an apartment, not both)
 export const meterSchema: FormFieldSchema[] = [
     {name: 'type', type: 'text', label: 'Meter Type', required: true},
     {name: 'value', type: 'number', label: 'Meter Value', required: false},
     {name: 'unit', type: 'text', label: 'Unit', required: true},
-    {name: 'costPerUnit', type: 'number', label: 'Cost Per Unit', required: true}
+    {name: 'costPerUnit', type: 'number', label: 'Cost Per Unit', required: true},
+    {
+        name: 'buildingId',
+        type: 'entity-select',
+        label: 'Building',
+        required: false,
+        entityType: 'buildings',
+        displayProperty: 'name',
+        relationship: 'one-to-one',
+        mutuallyExclusiveWith: ['apartmentId']
+    },
+    {
+        name: 'apartmentId',
+        type: 'entity-select',
+        label: 'Apartment',
+        required: false,
+        entityType: 'apartments',
+        displayProperty: 'name',
+        relationship: 'one-to-one',
+        mutuallyExclusiveWith: ['buildingId']
+    }
 ];
 
 // Helper function to get schema by entity type

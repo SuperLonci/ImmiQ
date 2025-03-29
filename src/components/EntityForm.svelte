@@ -1,19 +1,13 @@
 <script lang="ts">
-    import {createEventDispatcher} from 'svelte';
+    import {createEventDispatcher, onMount} from 'svelte';
+    import type {FormFieldSchema} from '$lib/entities';
 
     // Event dispatcher for form actions
     const dispatch = createEventDispatcher();
 
     // Props for the form
     export let entityType: string; // Name of the entity type (e.g., "Building")
-    export let schema: Array<{
-        name: string;
-        type: 'text' | 'number' | 'select' | 'date' | 'boolean';
-        label: string;
-        required: boolean;
-        options?: string[]; // For select fields
-        defaultValue?: any;
-    }> = []; // Schema definition passed from parent
+    export let schema: FormFieldSchema[] = []; // Schema definition passed from parent
     export let initialData: any = {}; // Optional initial data for editing
     export let isOpen: boolean = false; // Control visibility of popup
     export let isEditing: boolean = false; // Whether we're editing or creating
@@ -23,20 +17,75 @@
     let formData: any = {...initialData};
     let validationErrors: { [key: string]: string } = {};
 
+    // Store for related entity options
+    let relatedEntities: { [key: string]: any[] } = {};
+
+    // Flag to track which mutual exclusion group is active
+    let activeMutualExclusionGroups: { [key: string]: string } = {};
+
     // Reset form when initialData changes
     $: if (initialData) {
         formData = {...initialData};
+    }
+
+    // Fetch related entities when the form opens
+    $: if (isOpen && schema) {
+        loadRelatedEntities();
+    }
+
+    // Handle field mutual exclusion
+    function handleMutualExclusion(fieldName: string, value: any) {
+        const field = schema.find(f => f.name === fieldName);
+
+        if (field?.mutuallyExclusiveWith && value) {
+            field.mutuallyExclusiveWith.forEach(exclusiveField => {
+                // Clear the value of mutually exclusive fields
+                formData[exclusiveField] = '';
+            });
+        }
+    }
+
+    // Load all related entities needed for entity-select fields
+    async function loadRelatedEntities() {
+        const entityTypes = new Set<string>();
+
+        // Find all unique entity types needed
+        schema.forEach(field => {
+            if (field.type === 'entity-select' && field.entityType) {
+                entityTypes.add(field.entityType);
+            }
+        });
+
+        // Fetch each entity type
+        for (const entityType of entityTypes) {
+            try {
+                const response = await fetch(`/api/${entityType}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    relatedEntities[entityType] = data;
+                } else {
+                    console.error(`Failed to fetch ${entityType}`);
+                }
+            } catch (error) {
+                console.error(`Error fetching ${entityType}:`, error);
+            }
+        }
+
+        // Force a UI update
+        relatedEntities = {...relatedEntities};
     }
 
     // Close popup and reset data
     function closePopup() {
         formData = {...initialData};
         validationErrors = {};
+        relatedEntities = {};
+        activeMutualExclusionGroups = {};
         dispatch('close');
     }
 
     // Validate a single field
-    function validateField(fieldName: string, field: any): string | null {
+    function validateField(fieldName: string, field: FormFieldSchema): string | null {
         const value = formData[fieldName];
 
         if (field.required && (value === undefined || value === '' || value === null)) {
@@ -45,6 +94,18 @@
 
         if (field.type === 'number' && value !== '' && value !== null && isNaN(Number(value))) {
             return `${field.label} must be a number`;
+        }
+
+        // Special validation for mutually exclusive fields
+        if (field.mutuallyExclusiveWith && field.mutuallyExclusiveWith.length > 0) {
+            // Check if at least one field in the mutually exclusive group has a value
+            const hasValue = [field.name, ...field.mutuallyExclusiveWith].some(
+                name => formData[name] !== undefined && formData[name] !== '' && formData[name] !== null
+            );
+
+            if (!hasValue) {
+                return `Either ${field.label} or one of its related fields must be provided`;
+            }
         }
 
         return null;
@@ -63,7 +124,42 @@
             }
         });
 
+        // Special validation for mutually exclusive groups
+        const mutualGroups = getMutuallyExclusiveGroups();
+        for (const group of mutualGroups) {
+            // Check if exactly one field in each group has a value
+            const fieldsWithValues = group.filter(
+                name => formData[name] !== undefined && formData[name] !== '' && formData[name] !== null
+            );
+
+            if (group.some(name => schema.find(f => f.name === name)?.required) && fieldsWithValues.length === 0) {
+                // If any field in the group is required, ensure at least one has a value
+                group.forEach(name => {
+                    validationErrors[name] = `One of these related fields must be provided`;
+                });
+                isValid = false;
+            }
+        }
+
         return isValid;
+    }
+
+    // Get all mutually exclusive groups
+    function getMutuallyExclusiveGroups(): string[][] {
+        const groups: string[][] = [];
+        const processedFields = new Set<string>();
+
+        schema.forEach(field => {
+            if (field.mutuallyExclusiveWith && !processedFields.has(field.name)) {
+                const group = [field.name, ...field.mutuallyExclusiveWith];
+                groups.push(group);
+
+                // Mark all fields in this group as processed
+                group.forEach(name => processedFields.add(name));
+            }
+        });
+
+        return groups;
     }
 
     // Handle form submission
@@ -103,6 +199,19 @@
             });
         }
     }
+
+    // Handle value change for a field
+    function handleValueChange(fieldName: string, value: any) {
+        formData[fieldName] = value;
+
+        // Check for mutual exclusion
+        const field = schema.find(f => f.name === fieldName);
+        if (field?.mutuallyExclusiveWith && value) {
+            field.mutuallyExclusiveWith.forEach(exclusiveField => {
+                formData[exclusiveField] = '';
+            });
+        }
+    }
 </script>
 
 {#if isOpen}
@@ -131,7 +240,25 @@
                             {/if}
                         </label>
 
-                        {#if field.type === 'select' && field.options}
+                        {#if field.type === 'entity-select'}
+                            <select
+                                    id={field.name}
+                                    bind:value={formData[field.name]}
+                                    required={field.required}
+                                    on:change={() => handleMutualExclusion(field.name, formData[field.name])}
+                                    class="form-input {validationErrors[field.name] ? 'input-error' : ''}"
+                                    disabled={field.mutuallyExclusiveWith && field.mutuallyExclusiveWith.some(exclusiveField => formData[exclusiveField])}
+                            >
+                                <option value="">Select {field.label}</option>
+                                {#if field.entityType && relatedEntities[field.entityType]}
+                                    {#each relatedEntities[field.entityType] as entity}
+                                        <option value={entity.id}>
+                                            {field.displayProperty ? entity[field.displayProperty] : entity.id}
+                                        </option>
+                                    {/each}
+                                {/if}
+                            </select>
+                        {:else if field.type === 'select' && field.options}
                             <select
                                     id={field.name}
                                     bind:value={formData[field.name]}
@@ -288,6 +415,22 @@
         box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
     }
 
+    .form-input:disabled {
+        background-color: #e9e9e9;
+        cursor: not-allowed;
+        color: #777;
+    }
+
+    .input-error {
+        border-color: #e53e3e;
+    }
+
+    .field-error {
+        color: #e53e3e;
+        font-size: 0.8rem;
+        margin-top: 2px;
+    }
+
     .checkbox-container {
         height: 36px;
         display: flex;
@@ -333,6 +476,16 @@
 
     .submit-button:hover {
         background-color: #4338ca;
+    }
+
+    .error-message {
+        margin: 10px 20px 0;
+        padding: 8px 12px;
+        background-color: #fee2e2;
+        border: 1px solid #fecaca;
+        border-radius: 4px;
+        color: #b91c1c;
+        font-size: 0.9rem;
     }
 
     @keyframes slide-in {

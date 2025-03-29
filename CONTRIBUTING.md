@@ -26,22 +26,22 @@
 
 ## 🔄 Contribution Workflow
 
-1. **Sync with Upstream Repository** – 
+1. **Sync with Upstream Repository**
    Before making changes, always pull the latest updates from the original repository:  
     ```sh
    git checkout main
    git pull upstream main
    git push origin main
-2. **Creating a Branch** 
+2. **Creating a Branch**
    Always create a new branch for your contribution: 
    ```sh
    git checkout -b feature/your-feature-name
    ```
    Use descriptive branch names like fix/readme-typo or feature/add-login.
-3. **Writing Code** 
+3. **Writing Code**
    Follow project conventions and coding standards.
    Use Prettier for consistent formatting.   
-4. **Making a Commit** 
+4. **Making a Commit**
    Format commit messages clearly:
    ```sh
    feat: Added login feature

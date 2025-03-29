@@ -15,11 +15,14 @@
     export let detailed: boolean = false;
     export let schema: Array<{
         name: string;
-        type: 'text' | 'number' | 'select' | 'date' | 'boolean';
+        type: 'text' | 'number' | 'select' | 'date' | 'boolean' | 'entity-select';
         label: string;
         required: boolean;
         options?: string[];
         defaultValue?: any;
+        entityType?: string;        // Added for entity-select
+        displayProperty?: string;   // Added for entity-select
+        mutuallyExclusiveWith?: string[]; // Added for mutual exclusion
     }> = []; // Schema provided by the page component
 
     // Form state

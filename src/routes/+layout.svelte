@@ -1,6 +1,10 @@
 <script lang="ts">
     import "../app.css";
     import Footer from "../components/Footer.svelte";
+    import UserSession from '../components/UserSession.svelte';
+    import type {PageData} from './$types';
+
+    export let data: PageData;
 
     let menuItems = [
         {name: 'Buildings', path: '/buildings'},
@@ -68,9 +72,7 @@
                 &#9776; <!-- Burger menu icon -->
             </button>
             <h1 class="text-xl font-bold text-gray-800">Dashboard</h1>
-            <button class="bg-gray-800 text-white px-4 py-2 rounded-full hover:bg-gray-700 transition">
-                User
-            </button>
+            <UserSession user={data.user}/>
         </header>
 
         <!-- Dynamic Content -->

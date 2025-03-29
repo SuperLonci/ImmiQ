@@ -21,9 +21,6 @@
 6. **Run the Project Locally**  
    ```sh
    npm run dev
-5. **Install Dependencies**  
-   ```sh
-   npm install
    ```
    Open http://localhost:5173 in your browser.
 

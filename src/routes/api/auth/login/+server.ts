@@ -1,11 +1,9 @@
-import {PrismaClient} from '@prisma/client';
+import prisma from '$lib/server/prisma';
 import {json} from '@sveltejs/kit';
 import type {RequestHandler} from './$types';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {JWT_SECRET} from '$env/static/private';
-
-const prisma = new PrismaClient();
 
 export const POST: RequestHandler = async ({request}) => {
     try {

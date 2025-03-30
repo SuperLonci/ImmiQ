@@ -20,13 +20,13 @@ const auth: Handle = async ({event, resolve}) => {
                 where: {name: 'User One'}
             });
 
-            console.log("Demo user found:", demoUser); // Add this line
+            // console.log("Demo user found:", demoUser); // Add this line
 
             if (demoUser) {
                 // Don't expose the password in the session
                 const {password, ...userWithoutPassword} = demoUser;
                 event.locals.user = userWithoutPassword;
-                console.log("Setting demo user in locals:", event.locals.user); // Add this
+                // console.log("Setting demo user in locals:", event.locals.user); // Add this
 
                 // Skip the rest of the auth process
                 return resolve(event);

@@ -294,6 +294,7 @@
                                     bind:value={formData[field.name]}
                                     required={field.required}
                                     class="form-input {validationErrors[field.name] ? 'input-error' : ''}"
+                                    step={field.type === 'number' ? (field.step || '1') : undefined}
                             />
                         {/if}
 

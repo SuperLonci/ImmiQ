@@ -159,6 +159,7 @@ export type FormFieldSchema = {
     displayProperty?: string; // For entity-select fields, which property to display
     relationship?: 'one-to-one' | 'one-to-many'; // Type of relationship
     mutuallyExclusiveWith?: string[]; // For fields that can't be used together
+    step?: string; // For number fields to control decimal precision
 };
 
 // Building schema (no required dependencies)
@@ -319,9 +320,9 @@ export const leaseSchema: FormFieldSchema[] = [
 // Meter schema (requires either a building OR an apartment, not both)
 export const meterSchema: FormFieldSchema[] = [
     {name: 'type', type: 'text', label: 'Meter Type', required: true},
-    {name: 'value', type: 'number', label: 'Meter Value', required: false},
+    {name: 'value', type: 'number', label: 'Meter Value', required: false, step: '0.01'},
     {name: 'unit', type: 'text', label: 'Unit', required: true},
-    {name: 'costPerUnit', type: 'number', label: 'Cost Per Unit', required: true},
+    {name: 'costPerUnit', type: 'number', label: 'Cost Per Unit', required: true, step: '0.001'},
     {
         name: 'buildingId',
         type: 'entity-select',

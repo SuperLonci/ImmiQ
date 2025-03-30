@@ -8,7 +8,8 @@
 
     let meter: Meter;
     let loading = true;
-    $: meterId = page.params.id;
+    let error: string | null = null;
+    $: meterId = page.params.id; // Added $ before page
 
     onMount(async () => {
         try {
@@ -16,10 +17,12 @@
             if (response.ok) {
                 meter = await response.json();
             } else {
-                console.error('Failed to fetch meter details');
+                const errorData = await response.json();
+                error = errorData.message || 'Failed to fetch meter details';
             }
         } catch (error) {
             console.error('Error fetching meter details:', error);
+            error = 'An unexpected error occurred';
         } finally {
             loading = false;
         }
@@ -31,9 +34,28 @@
         backUrl="/meters"
         loading={loading}
 >
-    <DetailSection title="Meter Information">
-        <DetailItem label="Type">{meter?.type}</DetailItem>
-        <DetailItem label="House ID">{meter?.buildingId || 'N/A'}</DetailItem>
-        <DetailItem label="Unit ID">{meter?.apartmentId || 'N/A'}</DetailItem>
-    </DetailSection>
+    {#if meter}
+        <DetailSection title="Meter Information">
+            <DetailItem label="Type">{meter.type}</DetailItem>
+            <DetailItem
+                    label="Value">{meter.value !== null && meter.value !== undefined ? `${meter.value} ${meter.unit}` : 'Not set'}</DetailItem>
+            <DetailItem label="Cost Per Unit">{meter.costPerUnit} per {meter.unit}</DetailItem>
+            <DetailItem label="Created">{new Date(meter.createdAt).toLocaleString()}</DetailItem>
+            <DetailItem label="Last Updated">{new Date(meter.updatedAt).toLocaleString()}</DetailItem>
+        </DetailSection>
+
+        <DetailSection title="Location">
+            {#if meter.building}
+                <DetailItem label="Building">
+                    <a href="/buildings/{meter.buildingId}">{meter.building.name}</a>
+                </DetailItem>
+            {/if}
+
+            {#if meter.apartment}
+                <DetailItem label="Apartment">
+                    <a href="/apartments/{meter.apartmentId}">{meter.apartment.name}</a>
+                </DetailItem>
+            {/if}
+        </DetailSection>
+    {/if}
 </DetailView>

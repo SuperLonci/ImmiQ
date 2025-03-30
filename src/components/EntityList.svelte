@@ -30,6 +30,10 @@
     let isEditing = false;
     let currentItem: any = {};
 
+    // Delete confirmation state
+    let showDeleteConfirm = false;
+    let itemToDelete: any = null;
+
     // Get entity type from basePath
     $: entityType = basePath.split('/').filter(p => p).pop() || '';
     $: entityName = entityType.replace(/s$/, ''); // Remove trailing 's' for singular form
@@ -48,6 +52,50 @@
         isEditing = true;
         currentItem = {...item};
         showForm = true;
+    }
+
+    function handleDeleteItem(item: any) {
+        itemToDelete = item;
+        showDeleteConfirm = true;
+    }
+
+    async function confirmDelete() {
+        if (!itemToDelete) return;
+
+        try {
+            const response = await fetch(`/api${basePath}/${itemToDelete.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                // Refresh the data
+                await fetchItems();
+                // Close confirmation dialog
+                showDeleteConfirm = false;
+                itemToDelete = null;
+            } else {
+                // Error handling
+                let errorMessage = 'Unknown error occurred';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch (jsonError) {
+                    errorMessage = response.statusText || errorMessage;
+                }
+                alert(`Error: ${errorMessage}`);
+            }
+        } catch (error) {
+            console.error('Error deleting item:', error);
+            alert('An unexpected error occurred');
+        }
+    }
+
+    function cancelDelete() {
+        showDeleteConfirm = false;
+        itemToDelete = null;
     }
 
     async function handleFormSubmit(event: CustomEvent) {
@@ -143,6 +191,7 @@
                             {displayProperty}
                             on:click={() => viewDetails(item.id)}
                             on:edit={() => handleEditItem(item)}
+                            on:delete={() => handleDeleteItem(item)}
                     >
                         <slot name="item-content" {item}></slot>
                     </ListItemDetail>
@@ -152,6 +201,7 @@
                             {displayProperty}
                             on:click={() => viewDetails(item.id)}
                             on:edit={() => handleEditItem(item)}
+                            on:delete={() => handleDeleteItem(item)}
                     >
                         <slot name="item-content" {item}></slot>
                     </ListItem>
@@ -172,6 +222,21 @@
         on:submit={handleFormSubmit}
         on:error={handleFormError}
 />
+
+<!-- Delete confirmation modal -->
+{#if showDeleteConfirm}
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to delete {itemToDelete?.[displayProperty]}?</p>
+            <p class="warning">This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="cancel-button" on:click={cancelDelete}>Cancel</button>
+                <button class="delete-button" on:click={confirmDelete}>Delete</button>
+            </div>
+        </div>
+    </div>
+{/if}
 
 <style>
     .entity-list-container {
@@ -295,5 +360,73 @@
         margin-right: 8px;
         font-size: 0.85rem;
         color: #333;
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 24px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-content h3 {
+        margin-top: 0;
+        font-size: 1.25rem;
+        color: #333;
+    }
+
+    .warning {
+        color: #E53E3E;
+        font-weight: 500;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .cancel-button {
+        padding: 8px 16px;
+        background-color: #f3f4f6;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .cancel-button:hover {
+        background-color: #e5e7eb;
+    }
+
+    .delete-button {
+        padding: 8px 16px;
+        background-color: #E53E3E;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .delete-button:hover {
+        background-color: #C53030;
     }
 </style>

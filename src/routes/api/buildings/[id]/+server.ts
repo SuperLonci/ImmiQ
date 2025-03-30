@@ -1,7 +1,5 @@
-import {PrismaClient} from '@prisma/client';
+import prisma from '$lib/server/prisma';
 import type {RequestHandler} from './$types';
-
-const prisma = new PrismaClient();
 
 // GET a specific building by ID
 export const GET: RequestHandler = async ({params, locals}) => {
@@ -54,16 +52,6 @@ export const PUT: RequestHandler = async ({params, request, locals}) => {
     try {
         const id = params.id;
 
-        // Check if user is authenticated
-        if (!locals.user) {
-            return new Response(JSON.stringify({
-                message: 'Authentication required'
-            }), {
-                status: 401,
-                headers: {'Content-Type': 'application/json'},
-            });
-        }
-
         // Verify ownership of the building
         const existingBuilding = await prisma.building.findUnique({
             where: {id},
@@ -79,7 +67,7 @@ export const PUT: RequestHandler = async ({params, request, locals}) => {
             });
         }
 
-        if (existingBuilding.userId !== locals.user.id) {
+        if (existingBuilding.userId !== locals.user!.id) {
             return new Response(JSON.stringify({
                 message: 'Unauthorized: You do not own this building'
             }), {
@@ -129,16 +117,6 @@ export const DELETE: RequestHandler = async ({params, locals}) => {
     try {
         const id = params.id;
 
-        // Check if user is authenticated
-        if (!locals.user) {
-            return new Response(JSON.stringify({
-                message: 'Authentication required'
-            }), {
-                status: 401,
-                headers: {'Content-Type': 'application/json'},
-            });
-        }
-
         // Verify ownership of the building
         const existingBuilding = await prisma.building.findUnique({
             where: {id},
@@ -154,7 +132,7 @@ export const DELETE: RequestHandler = async ({params, locals}) => {
             });
         }
 
-        if (existingBuilding.userId !== locals.user.id) {
+        if (existingBuilding.userId !== locals.user!.id) {
             return new Response(JSON.stringify({
                 message: 'Unauthorized: You do not own this building'
             }), {

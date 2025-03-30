@@ -1,11 +1,12 @@
-import {PrismaClient} from '@prisma/client';
-import type {RequestEvent} from '@sveltejs/kit';
+import prisma from '$lib/server/prisma';
+import type {RequestHandler} from './$types';
 
-const prisma = new PrismaClient();
-
-export async function GET({params}: RequestEvent) {
-    const {id} = params as { id: string };
+// GET a specific lease by ID
+export const GET: RequestHandler = async ({params}) => {
     try {
+        // Access the id from params
+        const id = params.id;
+
         const lease = await prisma.lease.findUnique({
             where: {id},
             include: {
@@ -21,22 +22,143 @@ export async function GET({params}: RequestEvent) {
                 }
             }
         });
-        if (lease) {
-            return new Response(JSON.stringify(lease), {
-                headers: {'Content-Type': 'application/json'},
-            });
-        } else {
-            return new Response(JSON.stringify({error: 'Lease not found'}), {
+
+        if (!lease) {
+            return new Response(JSON.stringify({message: 'Lease not found'}), {
                 status: 404,
                 headers: {'Content-Type': 'application/json'},
             });
         }
+
+        return new Response(JSON.stringify(lease), {
+            headers: {'Content-Type': 'application/json'},
+        });
     } catch (error) {
-        return new Response(JSON.stringify({error: 'Failed to fetch lease details'}), {
+        return new Response(JSON.stringify({
+            message: 'Failed to fetch lease',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        }), {
             status: 500,
             headers: {'Content-Type': 'application/json'},
         });
     } finally {
         await prisma.$disconnect();
     }
-}
+};
+
+// PUT to update a lease
+export const PUT: RequestHandler = async ({params, request}) => {
+    try {
+        const id = params.id;
+
+        // Verify lease exists
+        const existingLease = await prisma.lease.findUnique({
+            where: {id}
+        });
+
+        if (!existingLease) {
+            return new Response(JSON.stringify({
+                message: 'Lease not found'
+            }), {
+                status: 404,
+                headers: {'Content-Type': 'application/json'},
+            });
+        }
+
+        const data = await request.json();
+
+        const lease = await prisma.lease.update({
+            where: {id},
+            data,
+            include: {
+                apartment: {
+                    select: {
+                        name: true
+                    }
+                },
+                tenant: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
+        });
+
+        return new Response(JSON.stringify(lease), {
+            headers: {'Content-Type': 'application/json'},
+        });
+    } catch (error) {
+        console.error('Error updating lease:', error);
+
+        // Handle record not found
+        if (error instanceof Error && 'code' in error && error.code === 'P2025') {
+            return new Response(JSON.stringify({
+                message: 'Lease not found'
+            }), {
+                status: 404,
+                headers: {'Content-Type': 'application/json'},
+            });
+        }
+
+        return new Response(JSON.stringify({
+            message: 'Failed to update lease',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        }), {
+            status: 500,
+            headers: {'Content-Type': 'application/json'},
+        });
+    } finally {
+        await prisma.$disconnect();
+    }
+};
+
+// DELETE a lease
+export const DELETE: RequestHandler = async ({params}) => {
+    try {
+        const id = params.id;
+
+        // Verify lease exists
+        const existingLease = await prisma.lease.findUnique({
+            where: {id}
+        });
+
+        if (!existingLease) {
+            return new Response(JSON.stringify({
+                message: 'Lease not found'
+            }), {
+                status: 404,
+                headers: {'Content-Type': 'application/json'},
+            });
+        }
+
+        await prisma.lease.delete({
+            where: {id},
+        });
+
+        return new Response(JSON.stringify({message: 'Lease deleted successfully'}), {
+            headers: {'Content-Type': 'application/json'},
+        });
+    } catch (error) {
+        console.error('Error deleting lease:', error);
+
+        // Handle record not found
+        if (error instanceof Error && 'code' in error && error.code === 'P2025') {
+            return new Response(JSON.stringify({
+                message: 'Lease not found'
+            }), {
+                status: 404,
+                headers: {'Content-Type': 'application/json'},
+            });
+        }
+
+        return new Response(JSON.stringify({
+            message: 'Failed to delete lease',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        }), {
+            status: 500,
+            headers: {'Content-Type': 'application/json'},
+        });
+    } finally {
+        await prisma.$disconnect();
+    }
+};

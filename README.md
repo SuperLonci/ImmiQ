@@ -60,6 +60,21 @@ Built for simplicity and scalability, it ensures seamless real estate management
     ```sh
     npm install
     ```
+4. Set up postgresql database
+
+5. Create a `.env` file in the root directory and set up your database connection string:
+    ```env
+    DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME"
+    ```
+6. Run the Prisma migrations to set up the database:
+    ```sh
+    npx prisma migrate dev --name init
+    ```
+
+7. Seed the database with initial data:
+    ```sh
+    npx prisma db seed
+    ```
 
 ### Running the Application
 
@@ -68,6 +83,7 @@ Built for simplicity and scalability, it ensures seamless real estate management
     npm run dev
     ```
 2. Open your browser and navigate to `http://localhost:5173`.
+3. If you set up everything correctly you should be logged in and ready to go
 
 ## Project Structure
 

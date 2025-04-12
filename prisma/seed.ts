@@ -2,7 +2,22 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function main() {
+async function clearDatabase() {
+	console.log('🌱 Clearing existing data...');
+	await prisma.$transaction([
+		prisma.lease.deleteMany(),
+		prisma.payment.deleteMany(),
+		prisma.tenant.deleteMany(),
+		prisma.cost.deleteMany(),
+		prisma.meter.deleteMany(),
+		prisma.apartment.deleteMany(),
+		prisma.building.deleteMany(),
+		prisma.user.deleteMany()
+	]);
+}
+
+async function seed() {
+	console.log('🌱 Seeding fresh data...');
 	// Create Users
 	const user1 = await prisma.user.create({
 		data: {
@@ -201,6 +216,14 @@ async function main() {
 			tenantId: tenant2.id
 		}
 	});
+}
+
+async function main() {
+	await clearDatabase();
+
+	await seed();
+
+	console.log('✅ Seeding complete.');
 }
 
 main()

@@ -95,15 +95,28 @@ export const PUT: RequestHandler = async ({ params, request }) => {
             });
         }
 
-        // Ensure occurredAt is in ISO-8601 format
-        if (data.occurredAt) {
-            data.occurredAt = new Date(data.occurredAt).toISOString();
+        // Prepare update data
+        const updateData: any = {
+            name: data.name,
+            amount: data.amount,
+            currency: data.currency,
+            type: data.type,
+            interval: data.interval,
+            biller: data.biller,
+            occurredAt: data.occurredAt ? new Date(data.occurredAt).toISOString() : undefined
+        };
+
+        // Handle relationships
+        if (data.apartmentId) {
+            updateData.apartment = { connect: { id: data.apartmentId } };
+        } else if (data.buildingId) {
+            updateData.building = { connect: { id: data.buildingId } };
         }
 
         // Update the cost
         const cost = await prisma.cost.update({
             where: { id },
-            data
+            data: updateData
         });
 
         return new Response(JSON.stringify(cost), {

@@ -12,18 +12,55 @@ async function clearDatabase() {
         prisma.meter.deleteMany(),
         prisma.apartment.deleteMany(),
         prisma.building.deleteMany(),
-        prisma.user.deleteMany()
+        prisma.user.deleteMany(),
+        prisma.address.deleteMany()
     ]);
 }
 
 async function seed() {
     console.log('🌱 Seeding fresh data...');
+
+    // Create Addresses
+    const address1 = await prisma.address.create({
+        data: {
+            street: 'Sunset Blvd',
+            houseNumber: '123',
+            city: 'Los Angeles',
+            postalCode: '90210',
+            state: 'California',
+            country: 'USA'
+        }
+    });
+
+    const address2 = await prisma.address.create({
+        data: {
+            street: 'Modern St',
+            houseNumber: '456',
+            city: 'San Francisco',
+            postalCode: '94105',
+            state: 'California',
+            country: 'USA'
+        }
+    });
+
+    const address3 = await prisma.address.create({
+        data: {
+            street: 'Tenant Ave',
+            houseNumber: '789',
+            city: 'New York',
+            postalCode: '10001',
+            state: 'New York',
+            country: 'USA'
+        }
+    });
+
     // Create Users
     const user1 = await prisma.user.create({
         data: {
             email: 'user123@example.com',
             password: 'password1',
-            name: 'User One'
+            name: 'User One',
+            addressId: address3.id
         }
     });
 
@@ -31,7 +68,8 @@ async function seed() {
         data: {
             email: 'user210@example.com',
             password: 'password2',
-            name: 'User Two'
+            name: 'User Two',
+            addressId: address3.id
         }
     });
 
@@ -39,7 +77,7 @@ async function seed() {
     const building1 = await prisma.building.create({
         data: {
             name: 'Sunset Villa',
-            address: '123 Sunset Blvd',
+            addressId: address1.id,
             userId: user1.id,
             floors: 2
         }
@@ -48,7 +86,7 @@ async function seed() {
     const building2 = await prisma.building.create({
         data: {
             name: 'Modern Loft',
-            address: '456 Modern St',
+            addressId: address2.id,
             userId: user2.id,
             floors: 1
         }
@@ -145,6 +183,27 @@ async function seed() {
         }
     });
 
+    // Create Tenants
+    const tenant1 = await prisma.tenant.create({
+        data: {
+            firstName: 'John',
+            name: 'Tenant One',
+            email: 'tenant111@example.com',
+            phoneNumber: '123-456-7890',
+            addressId: address1.id
+        }
+    });
+
+    const tenant2 = await prisma.tenant.create({
+        data: {
+            firstName: 'Jane',
+            name: 'Tenant Two',
+            email: 'tenant210@example.com',
+            phoneNumber: '098-765-4321',
+            addressId: address2.id
+        }
+    });
+
     // Create Payments
     const payment1 = await prisma.payment.create({
         data: {
@@ -176,25 +235,6 @@ async function seed() {
             status: 'pending',
             type: 'ADDITIONAL_PAYMENT',
             apartmentId: apartment1.id
-        }
-    });
-
-    // Create Tenants
-    const tenant1 = await prisma.tenant.create({
-        data: {
-            firstName: 'John',
-            name: 'Tenant One',
-            email: 'tenant111@example.com',
-            phoneNumber: '123-456-7890'
-        }
-    });
-
-    const tenant2 = await prisma.tenant.create({
-        data: {
-            firstName: 'Jane',
-            name: 'Tenant Two',
-            email: 'tenant210@example.com',
-            phoneNumber: '098-765-4321'
         }
     });
 

@@ -43,7 +43,8 @@
         {#if tenant?.leases && tenant.leases.length > 0}
             {#each tenant.leases as lease}
                 <DetailItem label="Address">
-                    {lease.apartment.building.address}
+                    {lease.apartment.building.address.street} {lease.apartment.building.address.houseNumber}
+                    , {lease.apartment.building.address.city}
                 </DetailItem>
             {/each}
         {:else}

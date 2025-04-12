@@ -14,7 +14,11 @@ export const GET: RequestHandler = async ({ params }) => {
                     include: {
                         apartment: {
                             include: {
-                                building: true
+                                building: {
+                                    include: {
+                                        address: true
+                                    }
+                                }
                             }
                         }
                     }
@@ -70,7 +74,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
         delete data.createdAt;
         delete data.updatedAt;
         delete data.leases;
-        
+
         const tenant = await prisma.tenant.update({
             where: { id },
             data

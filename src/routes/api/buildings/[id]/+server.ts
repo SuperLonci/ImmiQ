@@ -12,7 +12,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
             include: {
                 apartments: true,
                 costs: true,
-                meters: true
+                meters: true,
+                address: true
             }
         });
 
@@ -52,10 +53,8 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
     try {
         const id = params.id;
 
-        // Verify ownership of the building
         const existingBuilding = await prisma.building.findUnique({
-            where: { id },
-            select: { userId: true }
+            where: { id }
         });
 
         if (!existingBuilding) {
@@ -78,14 +77,18 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 
         const data = await request.json();
 
-        delete data.createdAt;
-        delete data.updatedAt;
-        delete data.apartments;
-
         const building = await prisma.building.update({
             where: { id },
-            data,
-            include: { apartments: true }
+            data: {
+                name: data.name,
+                floors: data.floors,
+                address: {
+                    connect: { id: data.addressId }
+                }
+            },
+            include: {
+                address: true
+            }
         });
 
         return new Response(JSON.stringify(building), {
@@ -121,10 +124,8 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
     try {
         const id = params.id;
 
-        // Verify ownership of the building
         const existingBuilding = await prisma.building.findUnique({
-            where: { id },
-            select: { userId: true }
+            where: { id }
         });
 
         if (!existingBuilding) {

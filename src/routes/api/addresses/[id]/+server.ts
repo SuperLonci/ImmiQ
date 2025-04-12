@@ -1,46 +1,38 @@
 import prisma from '$lib/server/prisma';
 import type { RequestHandler } from './$types';
 
-// GET a specific apartment by ID
-export const GET: RequestHandler = async ({ params }) => {
+// GET a specific address by ID
+export const GET: RequestHandler = async ({ params, locals }) => {
     try {
         // Access the id from params
         const id = params.id;
 
-        const apartment = await prisma.apartment.findUnique({
+        const address = await prisma.address.findUnique({
             where: { id },
-            include: {
-                meters: true,
-                costs: true,
-                payments: true,
-                leases: {
-                    include: {
-                        tenant: true
-                    }
-                },
-                building: {
-                    include: {
-                        meters: true,
-                        costs: true,
-                        address: true
-                    }
-                }
-            }
+            include: {}
         });
 
-        if (!apartment) {
-            return new Response(JSON.stringify({ message: 'Apartment not found' }), {
+        if (!address) {
+            return new Response(JSON.stringify({ message: 'address not found' }), {
                 status: 404,
                 headers: { 'Content-Type': 'application/json' }
             });
         }
 
-        return new Response(JSON.stringify(apartment), {
+        // Check if user has access to this address
+        if (locals.user && address.userId !== locals.user.id) {
+            return new Response(JSON.stringify({ message: 'Unauthorized access' }), {
+                status: 403,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        return new Response(JSON.stringify(address), {
             headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
         return new Response(JSON.stringify({
-            message: 'Failed to fetch apartment',
+            message: 'Failed to fetch address',
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
@@ -51,19 +43,19 @@ export const GET: RequestHandler = async ({ params }) => {
     }
 };
 
-// PUT to update an apartment
+// PUT to update an address
 export const PUT: RequestHandler = async ({ params, request }) => {
     try {
         const id = params.id;
 
-        // Verify apartment exists
-        const existingApartment = await prisma.apartment.findUnique({
+        // Verify ownership of the address
+        const existingAddress = await prisma.address.findUnique({
             where: { id }
         });
 
-        if (!existingApartment) {
+        if (!existingAddress) {
             return new Response(JSON.stringify({
-                message: 'Apartment not found'
+                message: 'address not found'
             }), {
                 status: 404,
                 headers: { 'Content-Type': 'application/json' }
@@ -76,43 +68,30 @@ export const PUT: RequestHandler = async ({ params, request }) => {
         delete data.updatedAt;
 
         const updateData: any = {
-            name: data.name,
-            size: data.size,
-            sizeUnit: data.sizeUnit,
-            floor: data.floor,
-            type: data.type
+            ...data
         };
 
         // Handle building relationship
-        if (data.buildingId) {
-            updateData.building = { connect: { id: data.buildingId } };
+        if (data.addressId) {
+            updateData.address = { connect: { id: data.addressId } };
         }
 
-        const apartment = await prisma.apartment.update({
+        const address = await prisma.address.update({
             where: { id },
-            data: updateData,
-            include: {
-                meters: true,
-                costs: true,
-                payments: true,
-                leases: {
-                    include: {
-                        tenant: true
-                    }
-                }
-            }
+            data,
+            include: {}
         });
 
-        return new Response(JSON.stringify(apartment), {
+        return new Response(JSON.stringify(address), {
             headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
-        console.error('Error updating apartment:', error);
+        console.error('Error updating address:', error);
 
         // Handle record not found
         if (error instanceof Error && 'code' in error && error.code === 'P2025') {
             return new Response(JSON.stringify({
-                message: 'Apartment not found'
+                message: 'address not found'
             }), {
                 status: 404,
                 headers: { 'Content-Type': 'application/json' }
@@ -120,7 +99,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
         }
 
         return new Response(JSON.stringify({
-            message: 'Failed to update apartment',
+            message: 'Failed to update address',
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
@@ -131,39 +110,49 @@ export const PUT: RequestHandler = async ({ params, request }) => {
     }
 };
 
-// DELETE an apartment
-export const DELETE: RequestHandler = async ({ params }) => {
+// DELETE an address
+export const DELETE: RequestHandler = async ({ params, locals }) => {
     try {
         const id = params.id;
 
-        // Verify apartment exists
-        const existingApartment = await prisma.apartment.findUnique({
-            where: { id }
+        // Verify ownership of the address
+        const existingAddress = await prisma.address.findUnique({
+            where: { id },
+            select: { userId: true }
         });
 
-        if (!existingApartment) {
+        if (!existingAddress) {
             return new Response(JSON.stringify({
-                message: 'Apartment not found'
+                message: 'address not found'
             }), {
                 status: 404,
                 headers: { 'Content-Type': 'application/json' }
             });
         }
 
-        await prisma.apartment.delete({
+        if (existingAddress.userId !== locals.user!.id) {
+            return new Response(JSON.stringify({
+                message: 'Unauthorized: You do not own this address'
+            }), {
+                status: 403,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        await prisma.address.delete({
             where: { id }
         });
 
-        return new Response(JSON.stringify({ message: 'Apartment deleted successfully' }), {
+        return new Response(JSON.stringify({ message: 'address deleted successfully' }), {
             headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
-        console.error('Error deleting apartment:', error);
+        console.error('Error deleting address:', error);
 
         // Handle record not found
         if (error instanceof Error && 'code' in error && error.code === 'P2025') {
             return new Response(JSON.stringify({
-                message: 'Apartment not found'
+                message: 'address not found'
             }), {
                 status: 404,
                 headers: { 'Content-Type': 'application/json' }
@@ -171,7 +160,7 @@ export const DELETE: RequestHandler = async ({ params }) => {
         }
 
         return new Response(JSON.stringify({
-            message: 'Failed to delete apartment',
+            message: 'Failed to delete address',
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,

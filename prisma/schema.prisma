@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -59,14 +56,32 @@ model User {
   password  String
   name      String
   buildings Building[]
+  addressId String?
+  address   Address?   @relation(fields: [addressId], references: [id])
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+}
+
+model Address {
+  id          String     @id @default(uuid())
+  street      String
+  houseNumber String
+  city        String
+  postalCode  String
+  state       String?
+  country     String
+  buildings   Building[]
+  users       User[]
+  tenants     Tenant[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Building {
   id         String      @id @default(uuid())
   name       String
-  address    String
+  addressId  String
+  address    Address     @relation(fields: [addressId], references: [id])
   apartments Apartment[]
   userId     String
   user       User        @relation(fields: [userId], references: [id])
@@ -144,6 +159,8 @@ model Tenant {
   name        String
   email       String   @unique
   phoneNumber String
+  addressId   String?
+  address     Address? @relation(fields: [addressId], references: [id])
   leases      Lease[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -76,9 +76,19 @@
         </div>
     </svelte:fragment>
 
-    <p><strong>Address:</strong> {building?.address || 'No address'}</p>
-    <p><strong>Floors:</strong> {building?.floors || 1}</p>
-    <p><strong>Total Units:</strong> {(building?.apartments && building.apartments.length) || 0}</p>
+    <DetailSection title="Details">
+        <p><strong>Floors:</strong> {building?.floors || 1}</p>
+        <p><strong>Total Units:</strong> {(building?.apartments && building.apartments.length) || 0}</p>
+        <p><strong>Address:</strong></p>
+        <ul>
+            <li>Street: {building?.address.street || 'N/A'}</li>
+            <li>House Number: {building?.address.houseNumber || 'N/A'}</li>
+            <li>City: {building?.address.city || 'N/A'}</li>
+            <li>Postal Code: {building?.address.postalCode || 'N/A'}</li>
+            <li>State: {building?.address.state || 'N/A'}</li>
+            <li>Country: {building?.address.country || 'N/A'}</li>
+        </ul>
+    </DetailSection>
 
     <DetailSection title="Units">
         <ul>

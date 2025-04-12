@@ -1,26 +1,19 @@
 import prisma from '$lib/server/prisma';
 import type { RequestHandler } from './$types';
 
-// GET all buildings
-export const GET: RequestHandler = async ({ locals }) => {
+// GET all addresses
+export const GET: RequestHandler = async ({}) => {
     try {
-        // If user is logged in, show only their buildings, otherwise show all (could be restricted in production)
-        const where = locals.user ? { userId: locals.user.id } : {};
-
-        const buildings = await prisma.building.findMany({
-            where,
-            include: {
-                apartments: true,
-                address: true
-            }
+        const addresses = await prisma.address.findMany({
+            include: {}
         });
 
-        return new Response(JSON.stringify(buildings), {
+        return new Response(JSON.stringify(addresses), {
             headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
         return new Response(JSON.stringify({
-            error: 'Failed to fetch buildings',
+            error: 'Failed to fetch addresses',
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
@@ -31,7 +24,7 @@ export const GET: RequestHandler = async ({ locals }) => {
     }
 };
 
-// POST a new building
+// POST a new address
 export const POST: RequestHandler = async ({ request, locals }) => {
     try {
 
@@ -42,23 +35,23 @@ export const POST: RequestHandler = async ({ request, locals }) => {
             data.userId = locals.user!.id;
         }
 
-        // Create the building with the user ID from the session
-        const building = await prisma.building.create({
+        // Create the address with the user ID from the session
+        const address = await prisma.address.create({
             data,
-            include: { apartments: true }
+            include: {}
         });
 
-        return new Response(JSON.stringify(building), {
+        return new Response(JSON.stringify(address), {
             status: 201, // Created
             headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
-        console.error('Error creating building:', error);
+        console.error('Error creating address:', error);
 
         // Handle validation errors more gracefully
         if (error instanceof Error && 'code' in error && error.code === 'P2002') {
             return new Response(JSON.stringify({
-                message: 'A building with this name or address already exists'
+                message: 'A address with this name or address already exists'
             }), {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' }
@@ -66,7 +59,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         }
 
         return new Response(JSON.stringify({
-            message: 'Failed to create building',
+            message: 'Failed to create address',
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,

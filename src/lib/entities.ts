@@ -4,6 +4,23 @@ export interface User {
     password: string;
     name: string;
     buildings: Building[];
+    addressId?: string;
+    address?: Address;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface Address {
+    id: string;
+    street: string;
+    houseNumber: string;
+    city: string;
+    postalCode: string;
+    state?: string;
+    country: string;
+    buildings: Building[];
+    users: User[];
+    tenants: Tenant[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -11,7 +28,8 @@ export interface User {
 export interface Building {
     id: string;
     name: string;
-    address: string;
+    addressId: string;
+    address: Address;
     apartments: Apartment[];
     userId: string;
     user: User;
@@ -89,6 +107,8 @@ export interface Tenant {
     name: string;
     email: string;
     phoneNumber: string;
+    addressId?: string;
+    address?: Address;
     leases: Lease[];
     createdAt: Date;
     updatedAt: Date;
@@ -163,10 +183,28 @@ export type FormFieldSchema = {
     step?: string; // For number fields to control decimal precision
 };
 
-// Building schema (no required dependencies)
+// Address schema
+export const addressSchema: FormFieldSchema[] = [
+    { name: 'street', type: 'text', label: 'Street', required: true },
+    { name: 'houseNumber', type: 'text', label: 'House Number', required: true },
+    { name: 'city', type: 'text', label: 'City', required: true },
+    { name: 'postalCode', type: 'text', label: 'Postal Code', required: true },
+    { name: 'state', type: 'text', label: 'State/Province', required: false },
+    { name: 'country', type: 'text', label: 'Country', required: true }
+];
+
+// Building schema (now requires an address)
 export const buildingSchema: FormFieldSchema[] = [
     { name: 'name', type: 'text', label: 'Building Name', required: true },
-    { name: 'address', type: 'text', label: 'Address', required: true },
+    {
+        name: 'addressId',
+        type: 'entity-select',
+        label: 'Address',
+        required: true,
+        entityType: 'addresses',
+        displayProperty: 'street',
+        relationship: 'one-to-one'
+    },
     { name: 'floors', type: 'number', label: 'Number of Floors', required: true }
 ];
 
@@ -279,12 +317,21 @@ export const paymentSchema: FormFieldSchema[] = [
     }
 ];
 
-// Tenant schema (no required dependencies)
+// Tenant schema
 export const tenantSchema: FormFieldSchema[] = [
     { name: 'firstName', type: 'text', label: 'First Name', required: true },
     { name: 'name', type: 'text', label: 'Last Name', required: true },
     { name: 'email', type: 'text', label: 'Email', required: true },
-    { name: 'phoneNumber', type: 'text', label: 'Phone Number', required: false }
+    { name: 'phoneNumber', type: 'text', label: 'Phone Number', required: false },
+    {
+        name: 'addressId',
+        type: 'entity-select',
+        label: 'Address',
+        required: false,
+        entityType: 'addresses',
+        displayProperty: 'street',
+        relationship: 'one-to-one'
+    }
 ];
 
 // Lease schema (requires an apartment and a tenant)
@@ -350,6 +397,8 @@ export const meterSchema: FormFieldSchema[] = [
 // Helper function to get schema by entity type
 export function getSchemaForEntityType(entityType: string): FormFieldSchema[] {
     const schemas: Record<string, FormFieldSchema[]> = {
+        'address': addressSchema,
+        'addresses': addressSchema,
         'building': buildingSchema,
         'buildings': buildingSchema,
         'apartment': apartmentSchema,

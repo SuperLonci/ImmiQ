@@ -5,12 +5,14 @@
     import EntityDetail from '../../../components/EntityDetail.svelte';
     import DetailSection from '../../../components/DetailSection.svelte';
     import DetailButton from '../../../components/DetailButton.svelte';
-    import { type Apartment, type Meter, type Cost, type Tenant, apartmentSchema } from '$lib/entities';
+    import { type Apartment, type Meter, type Cost, type Tenant, type Address, apartmentSchema } from '$lib/entities';
+    import DetailItem from '../../../components/DetailItem.svelte';
 
     let apartment: Apartment;
     let buildingMeters: Meter[] = [];
     let buildingCosts: Cost[] = [];
     let tenant: Tenant;
+    let address: Address;
     let loading = true;
     $: apartmentId = page.params.id;
 
@@ -55,7 +57,15 @@
         </div>
     </svelte:fragment>
 
-    <p>Floor: {apartment?.floor}</p>
+    <DetailSection title="Details">
+        <DetailItem label='Floor'>
+            {apartment?.floor}
+        </DetailItem>
+        <DetailItem label='Address'>
+            {apartment?.building.address.street} {apartment?.building.address.houseNumber}
+            , {apartment?.building.address.city}
+        </DetailItem>
+    </DetailSection>
 
     <DetailSection title="Tenant">
         {#if tenant}

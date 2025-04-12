@@ -1,7 +1,7 @@
 <script lang="ts">
-    import {onMount} from 'svelte';
+    import { onMount } from 'svelte';
     import EntityList from '../../components/EntityList.svelte';
-    import {type Meter, meterSchema} from '$lib/entities';
+    import { type Meter, meterSchema } from '$lib/entities';
 
     let meters: Meter[] = [];
     let loading: boolean = true;
@@ -24,15 +24,15 @@
 </script>
 
 <EntityList
-        title="Meters"
-        items={meters}
-        loading={loading}
-        basePath="/meters"
-        displayProperty="type"
-        emptyMessage="No meters available"
-        bind:detailed={showDetailed}
-        showAddButton={true}
-        schema={meterSchema}
+    title="Meters"
+    items={meters}
+    loading={loading}
+    basePath="/meters"
+    displayProperty="type"
+    emptyMessage="No meters available"
+    bind:detailed={showDetailed}
+    showAddButton={true}
+    schema={meterSchema}
 >
     <svelte:fragment slot="item-content" let:item>
         <span>: {item.building?.name || item.apartment?.name || 'N/A'}</span>

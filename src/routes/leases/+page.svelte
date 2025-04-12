@@ -1,7 +1,7 @@
 <script lang="ts">
-    import {onMount} from 'svelte';
+    import { onMount } from 'svelte';
     import EntityList from '../../components/EntityList.svelte';
-    import {type Lease, leaseSchema} from '$lib/entities';
+    import { type Lease, leaseSchema } from '$lib/entities';
 
     let leases: Lease[] = [];
     let loading: boolean = true;
@@ -24,15 +24,15 @@
 </script>
 
 <EntityList
-        title="Leases"
-        items={leases}
-        loading={loading}
-        basePath="/leases"
-        displayProperty=""
-        emptyMessage="No leases available"
-        bind:detailed={showDetailed}
-        showAddButton={true}
-        schema={leaseSchema}
+    title="Leases"
+    items={leases}
+    loading={loading}
+    basePath="/leases"
+    displayProperty=""
+    emptyMessage="No leases available"
+    bind:detailed={showDetailed}
+    showAddButton={true}
+    schema={leaseSchema}
 >
     <svelte:fragment slot="item-content" let:item>
         <span>{item.apartment.name}: {item.tenant.name}</span>

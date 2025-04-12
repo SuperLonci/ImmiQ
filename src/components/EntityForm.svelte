@@ -1,320 +1,320 @@
 <script lang="ts">
-    import {createEventDispatcher} from 'svelte';
-    import type {FormFieldSchema} from '$lib/entities';
+  import { createEventDispatcher } from 'svelte';
+  import type { FormFieldSchema } from '$lib/entities';
 
-    // Event dispatcher for form actions
-    const dispatch = createEventDispatcher();
+  // Event dispatcher for form actions
+  const dispatch = createEventDispatcher();
 
-    // Props for the form
-    export let entityType: string; // Name of the entity type (e.g., "Building")
-    export let schema: FormFieldSchema[] = []; // Schema definition passed from parent
-    export let initialData: any = {}; // Optional initial data for editing
-    export let isOpen: boolean = false; // Control visibility of popup
-    export let isEditing: boolean = false; // Whether we're editing or creating
-    export let errorMessage: string | null = null; // Error message from form submission
+  // Props for the form
+  export let entityType: string; // Name of the entity type (e.g., "Building")
+  export let schema: FormFieldSchema[] = []; // Schema definition passed from parent
+  export let initialData: any = {}; // Optional initial data for editing
+  export let isOpen: boolean = false; // Control visibility of popup
+  export let isEditing: boolean = false; // Whether we're editing or creating
+  export let errorMessage: string | null = null; // Error message from form submission
 
-    // Dynamic form data
-    let formData: any = {...initialData};
-    let validationErrors: { [key: string]: string } = {};
+  // Dynamic form data
+  let formData: any = { ...initialData };
+  let validationErrors: { [key: string]: string } = {};
 
-    // Store for related entity options
-    let relatedEntities: { [key: string]: any[] } = {};
+  // Store for related entity options
+  let relatedEntities: { [key: string]: any[] } = {};
 
-    // Flag to track which mutual exclusion group is active
-    let activeMutualExclusionGroups: { [key: string]: string } = {};
+  // Flag to track which mutual exclusion group is active
+  let activeMutualExclusionGroups: { [key: string]: string } = {};
 
-    // Reset form when initialData changes
-    $: if (initialData) {
-        formData = {...initialData};
+  // Reset form when initialData changes
+  $: if (initialData) {
+    formData = { ...initialData };
+  }
+
+  // Fetch related entities when the form opens
+  $: if (isOpen && schema) {
+    loadRelatedEntities();
+  }
+
+  // Handle field mutual exclusion
+  function handleMutualExclusion(fieldName: string, value: any) {
+    const field = schema.find(f => f.name === fieldName);
+
+    if (field?.mutuallyExclusiveWith && value) {
+      field.mutuallyExclusiveWith.forEach(exclusiveField => {
+        // Clear the value of mutually exclusive fields
+        formData[exclusiveField] = '';
+      });
     }
+  }
 
-    // Fetch related entities when the form opens
-    $: if (isOpen && schema) {
-        loadRelatedEntities();
-    }
+  // Load all related entities needed for entity-select fields
+  async function loadRelatedEntities() {
+    const entityTypes = new Set<string>();
 
-    // Handle field mutual exclusion
-    function handleMutualExclusion(fieldName: string, value: any) {
-        const field = schema.find(f => f.name === fieldName);
+    // Find all unique entity types needed
+    schema.forEach(field => {
+      if (field.type === 'entity-select' && field.entityType) {
+        entityTypes.add(field.entityType);
+      }
+    });
 
-        if (field?.mutuallyExclusiveWith && value) {
-            field.mutuallyExclusiveWith.forEach(exclusiveField => {
-                // Clear the value of mutually exclusive fields
-                formData[exclusiveField] = '';
-            });
+    // Fetch each entity type
+    for (const entityType of entityTypes) {
+      try {
+        const response = await fetch(`/api/${entityType}`);
+        if (response.ok) {
+          const data = await response.json();
+          relatedEntities[entityType] = data;
+        } else {
+          console.error(`Failed to fetch ${entityType}`);
         }
+      } catch (error) {
+        console.error(`Error fetching ${entityType}:`, error);
+      }
     }
 
-    // Load all related entities needed for entity-select fields
-    async function loadRelatedEntities() {
-        const entityTypes = new Set<string>();
+    // Force a UI update
+    relatedEntities = { ...relatedEntities };
+  }
 
-        // Find all unique entity types needed
-        schema.forEach(field => {
-            if (field.type === 'entity-select' && field.entityType) {
-                entityTypes.add(field.entityType);
-            }
+  // Close popup and reset data
+  function closePopup() {
+    formData = { ...initialData };
+    validationErrors = {};
+    relatedEntities = {};
+    activeMutualExclusionGroups = {};
+    dispatch('close');
+  }
+
+  // Validate a single field
+  function validateField(fieldName: string, field: FormFieldSchema): string | null {
+    const value = formData[fieldName];
+
+    if (field.required && (value === undefined || value === '' || value === null)) {
+      return `${field.label} is required`;
+    }
+
+    if (field.type === 'number' && value !== '' && value !== null && isNaN(Number(value))) {
+      return `${field.label} must be a number`;
+    }
+
+    // Special validation for mutually exclusive fields
+    if (field.mutuallyExclusiveWith && field.mutuallyExclusiveWith.length > 0) {
+      // Check if at least one field in the mutually exclusive group has a value
+      const hasValue = [field.name, ...field.mutuallyExclusiveWith].some(
+        name => formData[name] !== undefined && formData[name] !== '' && formData[name] !== null
+      );
+
+      if (!hasValue) {
+        return `Either ${field.label} or one of its related fields must be provided`;
+      }
+    }
+
+    return null;
+  }
+
+  // Validate all fields
+  function validateForm(): boolean {
+    validationErrors = {};
+    let isValid = true;
+
+    schema.forEach(field => {
+      const error = validateField(field.name, field);
+      if (error) {
+        validationErrors[field.name] = error;
+        isValid = false;
+      }
+    });
+
+    // Special validation for mutually exclusive groups
+    const mutualGroups = getMutuallyExclusiveGroups();
+    for (const group of mutualGroups) {
+      // Check if exactly one field in each group has a value
+      const fieldsWithValues = group.filter(
+        name => formData[name] !== undefined && formData[name] !== '' && formData[name] !== null
+      );
+
+      if (group.some(name => schema.find(f => f.name === name)?.required) && fieldsWithValues.length === 0) {
+        // If any field in the group is required, ensure at least one has a value
+        group.forEach(name => {
+          validationErrors[name] = `One of these related fields must be provided`;
         });
-
-        // Fetch each entity type
-        for (const entityType of entityTypes) {
-            try {
-                const response = await fetch(`/api/${entityType}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    relatedEntities[entityType] = data;
-                } else {
-                    console.error(`Failed to fetch ${entityType}`);
-                }
-            } catch (error) {
-                console.error(`Error fetching ${entityType}:`, error);
-            }
-        }
-
-        // Force a UI update
-        relatedEntities = {...relatedEntities};
+        isValid = false;
+      }
     }
 
-    // Close popup and reset data
-    function closePopup() {
-        formData = {...initialData};
-        validationErrors = {};
-        relatedEntities = {};
-        activeMutualExclusionGroups = {};
-        dispatch('close');
+    return isValid;
+  }
+
+  // Get all mutually exclusive groups
+  function getMutuallyExclusiveGroups(): string[][] {
+    const groups: string[][] = [];
+    const processedFields = new Set<string>();
+
+    schema.forEach(field => {
+      if (field.mutuallyExclusiveWith && !processedFields.has(field.name)) {
+        const group = [field.name, ...field.mutuallyExclusiveWith];
+        groups.push(group);
+
+        // Mark all fields in this group as processed
+        group.forEach(name => processedFields.add(name));
+      }
+    });
+
+    return groups;
+  }
+
+  // Handle form submission
+  async function handleSubmit() {
+    try {
+      // Validate form
+      if (!validateForm()) {
+        return;
+      }
+
+      // Dispatch submit event with form data
+      dispatch('submit', { data: formData, isEditing });
+    } catch (error) {
+      console.error(`Error in form submission:`, error);
+      dispatch('error', { message: 'An unexpected error occurred' });
     }
+  }
 
-    // Validate a single field
-    function validateField(fieldName: string, field: FormFieldSchema): string | null {
-        const value = formData[fieldName];
-
-        if (field.required && (value === undefined || value === '' || value === null)) {
-            return `${field.label} is required`;
-        }
-
-        if (field.type === 'number' && value !== '' && value !== null && isNaN(Number(value))) {
-            return `${field.label} must be a number`;
-        }
-
-        // Special validation for mutually exclusive fields
-        if (field.mutuallyExclusiveWith && field.mutuallyExclusiveWith.length > 0) {
-            // Check if at least one field in the mutually exclusive group has a value
-            const hasValue = [field.name, ...field.mutuallyExclusiveWith].some(
-                name => formData[name] !== undefined && formData[name] !== '' && formData[name] !== null
-            );
-
-            if (!hasValue) {
-                return `Either ${field.label} or one of its related fields must be provided`;
-            }
-        }
-
-        return null;
+  // Modal click outside detection
+  function handleBackdropClick(event: MouseEvent) {
+    if (event.target === event.currentTarget) {
+      closePopup();
     }
+  }
 
-    // Validate all fields
-    function validateForm(): boolean {
-        validationErrors = {};
-        let isValid = true;
-
-        schema.forEach(field => {
-            const error = validateField(field.name, field);
-            if (error) {
-                validationErrors[field.name] = error;
-                isValid = false;
-            }
-        });
-
-        // Special validation for mutually exclusive groups
-        const mutualGroups = getMutuallyExclusiveGroups();
-        for (const group of mutualGroups) {
-            // Check if exactly one field in each group has a value
-            const fieldsWithValues = group.filter(
-                name => formData[name] !== undefined && formData[name] !== '' && formData[name] !== null
-            );
-
-            if (group.some(name => schema.find(f => f.name === name)?.required) && fieldsWithValues.length === 0) {
-                // If any field in the group is required, ensure at least one has a value
-                group.forEach(name => {
-                    validationErrors[name] = `One of these related fields must be provided`;
-                });
-                isValid = false;
-            }
+  // Initialize empty values for new fields
+  $: {
+    if (schema) {
+      schema.forEach(field => {
+        if (formData[field.name] === undefined) {
+          if (field.defaultValue !== undefined) {
+            formData[field.name] = field.defaultValue;
+          } else {
+            formData[field.name] = field.type === 'boolean' ? false : '';
+          }
         }
-
-        return isValid;
+      });
     }
+  }
 
-    // Get all mutually exclusive groups
-    function getMutuallyExclusiveGroups(): string[][] {
-        const groups: string[][] = [];
-        const processedFields = new Set<string>();
+  // Handle value change for a field
+  function handleValueChange(fieldName: string, value: any) {
+    formData[fieldName] = value;
 
-        schema.forEach(field => {
-            if (field.mutuallyExclusiveWith && !processedFields.has(field.name)) {
-                const group = [field.name, ...field.mutuallyExclusiveWith];
-                groups.push(group);
-
-                // Mark all fields in this group as processed
-                group.forEach(name => processedFields.add(name));
-            }
-        });
-
-        return groups;
+    // Check for mutual exclusion
+    const field = schema.find(f => f.name === fieldName);
+    if (field?.mutuallyExclusiveWith && value) {
+      field.mutuallyExclusiveWith.forEach(exclusiveField => {
+        formData[exclusiveField] = '';
+      });
     }
-
-    // Handle form submission
-    async function handleSubmit() {
-        try {
-            // Validate form
-            if (!validateForm()) {
-                return;
-            }
-
-            // Dispatch submit event with form data
-            dispatch('submit', {data: formData, isEditing});
-        } catch (error) {
-            console.error(`Error in form submission:`, error);
-            dispatch('error', {message: 'An unexpected error occurred'});
-        }
-    }
-
-    // Modal click outside detection
-    function handleBackdropClick(event: MouseEvent) {
-        if (event.target === event.currentTarget) {
-            closePopup();
-        }
-    }
-
-    // Initialize empty values for new fields
-    $: {
-        if (schema) {
-            schema.forEach(field => {
-                if (formData[field.name] === undefined) {
-                    if (field.defaultValue !== undefined) {
-                        formData[field.name] = field.defaultValue;
-                    } else {
-                        formData[field.name] = field.type === 'boolean' ? false : '';
-                    }
-                }
-            });
-        }
-    }
-
-    // Handle value change for a field
-    function handleValueChange(fieldName: string, value: any) {
-        formData[fieldName] = value;
-
-        // Check for mutual exclusion
-        const field = schema.find(f => f.name === fieldName);
-        if (field?.mutuallyExclusiveWith && value) {
-            field.mutuallyExclusiveWith.forEach(exclusiveField => {
-                formData[exclusiveField] = '';
-            });
-        }
-    }
+  }
 </script>
 
 {#if isOpen}
-    <div class="popup-backdrop" on:click={handleBackdropClick}>
-        <div class="popup-container" on:click|stopPropagation>
-            <div class="popup-header">
-                <h2 class="popup-title">
-                    {isEditing ? `Edit ${entityType}` : `New ${entityType}`}
-                </h2>
-                <button class="close-button" on:click={closePopup}>×</button>
-            </div>
+  <div class="popup-backdrop" on:click={handleBackdropClick}>
+    <div class="popup-container" on:click|stopPropagation>
+      <div class="popup-header">
+        <h2 class="popup-title">
+          {isEditing ? `Edit ${entityType}` : `New ${entityType}`}
+        </h2>
+        <button class="close-button" on:click={closePopup}>×</button>
+      </div>
 
-            {#if errorMessage}
-                <div class="error-message">
-                    {errorMessage}
-                </div>
+      {#if errorMessage}
+        <div class="error-message">
+          {errorMessage}
+        </div>
+      {/if}
+
+      <form on:submit|preventDefault={handleSubmit} class="entity-form">
+        {#each schema as field}
+          <div class="form-field">
+            <label for={field.name} class="form-label">
+              {field.label}
+              {#if field.required}
+                <span class="required-asterisk">*</span>
+              {/if}
+            </label>
+
+            {#if field.type === 'entity-select'}
+              <select
+                id={field.name}
+                bind:value={formData[field.name]}
+                required={field.required}
+                on:change={() => handleMutualExclusion(field.name, formData[field.name])}
+                class="form-input {validationErrors[field.name] ? 'input-error' : ''}"
+                disabled={field.mutuallyExclusiveWith && field.mutuallyExclusiveWith.some(exclusiveField => formData[exclusiveField])}
+              >
+                <option value="">-No {field.label} Selected-</option>
+                {#if field.entityType && relatedEntities[field.entityType]}
+                  {#each relatedEntities[field.entityType] as entity}
+                    <option value={entity.id}>
+                      {field.displayProperty ? entity[field.displayProperty] : entity.id}
+                    </option>
+                  {/each}
+                {/if}
+              </select>
+            {:else if field.type === 'select' && field.options}
+              <select
+                id={field.name}
+                bind:value={formData[field.name]}
+                required={field.required}
+                class="form-input {validationErrors[field.name] ? 'input-error' : ''}"
+              >
+                <option value="">-Select {field.label}-</option>
+                {#each field.options as option}
+                  <option value={option}>{option}</option>
+                {/each}
+              </select>
+            {:else if field.type === 'date'}
+              <input
+                type="date"
+                id={field.name}
+                bind:value={formData[field.name]}
+                required={field.required}
+                class="form-input {validationErrors[field.name] ? 'input-error' : ''}"
+              />
+            {:else if field.type === 'boolean'}
+              <div class="checkbox-container">
+                <input
+                  type="checkbox"
+                  id={field.name}
+                  bind:checked={formData[field.name]}
+                  class="form-checkbox"
+                />
+              </div>
+            {:else}
+              <input
+                type={field.type}
+                id={field.name}
+                bind:value={formData[field.name]}
+                required={field.required}
+                class="form-input {validationErrors[field.name] ? 'input-error' : ''}"
+                step={field.type === 'number' ? (field.step || '1') : undefined}
+              />
             {/if}
 
-            <form on:submit|preventDefault={handleSubmit} class="entity-form">
-                {#each schema as field}
-                    <div class="form-field">
-                        <label for={field.name} class="form-label">
-                            {field.label}
-                            {#if field.required}
-                                <span class="required-asterisk">*</span>
-                            {/if}
-                        </label>
+            {#if validationErrors[field.name]}
+              <div class="field-error">{validationErrors[field.name]}</div>
+            {/if}
+          </div>
+        {/each}
 
-                        {#if field.type === 'entity-select'}
-                            <select
-                                    id={field.name}
-                                    bind:value={formData[field.name]}
-                                    required={field.required}
-                                    on:change={() => handleMutualExclusion(field.name, formData[field.name])}
-                                    class="form-input {validationErrors[field.name] ? 'input-error' : ''}"
-                                    disabled={field.mutuallyExclusiveWith && field.mutuallyExclusiveWith.some(exclusiveField => formData[exclusiveField])}
-                            >
-                                <option value="">Select {field.label}</option>
-                                {#if field.entityType && relatedEntities[field.entityType]}
-                                    {#each relatedEntities[field.entityType] as entity}
-                                        <option value={entity.id}>
-                                            {field.displayProperty ? entity[field.displayProperty] : entity.id}
-                                        </option>
-                                    {/each}
-                                {/if}
-                            </select>
-                        {:else if field.type === 'select' && field.options}
-                            <select
-                                    id={field.name}
-                                    bind:value={formData[field.name]}
-                                    required={field.required}
-                                    class="form-input {validationErrors[field.name] ? 'input-error' : ''}"
-                            >
-                                <option value="">Select {field.label}</option>
-                                {#each field.options as option}
-                                    <option value={option}>{option}</option>
-                                {/each}
-                            </select>
-                        {:else if field.type === 'date'}
-                            <input
-                                    type="date"
-                                    id={field.name}
-                                    bind:value={formData[field.name]}
-                                    required={field.required}
-                                    class="form-input {validationErrors[field.name] ? 'input-error' : ''}"
-                            />
-                        {:else if field.type === 'boolean'}
-                            <div class="checkbox-container">
-                                <input
-                                        type="checkbox"
-                                        id={field.name}
-                                        bind:checked={formData[field.name]}
-                                        class="form-checkbox"
-                                />
-                            </div>
-                        {:else}
-                            <input
-                                    type={field.type}
-                                    id={field.name}
-                                    bind:value={formData[field.name]}
-                                    required={field.required}
-                                    class="form-input {validationErrors[field.name] ? 'input-error' : ''}"
-                                    step={field.type === 'number' ? (field.step || '1') : undefined}
-                            />
-                        {/if}
-
-                        {#if validationErrors[field.name]}
-                            <div class="field-error">{validationErrors[field.name]}</div>
-                        {/if}
-                    </div>
-                {/each}
-
-                <div class="form-actions">
-                    <button type="button" class="cancel-button" on:click={closePopup}>
-                        Cancel
-                    </button>
-                    <button type="submit" class="submit-button">
-                        {isEditing ? 'Update' : 'Create'} {entityType}
-                    </button>
-                </div>
-            </form>
+        <div class="form-actions">
+          <button type="button" class="cancel-button" on:click={closePopup}>
+            Cancel
+          </button>
+          <button type="submit" class="submit-button">
+            {isEditing ? 'Update' : 'Create'} {entityType}
+          </button>
         </div>
+      </form>
     </div>
+  </div>
 {/if}
 
 <style>

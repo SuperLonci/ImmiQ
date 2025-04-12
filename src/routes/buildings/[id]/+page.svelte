@@ -1,12 +1,13 @@
 <script lang="ts">
-    import {onMount} from 'svelte';
-    import {page} from '$app/state';
-    import {goto} from '$app/navigation';
-    import {generateHouseGraphic} from "$lib/houseGraphic";
-    import DetailView from '../../../components/DetailView.svelte';
+    import { onMount } from 'svelte';
+    import { page } from '$app/state';
+    import { goto } from '$app/navigation';
+    import { generateHouseGraphic } from '$lib/houseGraphic';
+    import EntityDetail from '../../../components/EntityDetail.svelte';
     import DetailSection from '../../../components/DetailSection.svelte';
     import DetailButton from '../../../components/DetailButton.svelte';
-    import type {Building, Meter, Cost} from '$lib/entities';
+    import { type Building, type Meter, type Cost } from '$lib/entities';
+    import { buildingSchema } from '$lib/entities.js';
 
     let building: Building;
     let meters: Meter[] = [];
@@ -52,21 +53,23 @@
     }
 </script>
 
-<DetailView
-        title={building?.name || 'House'}
-        backUrl="/buildings"
-        loading={loading}
+<EntityDetail
+    title={building?.name || 'House'}
+    loading={loading}
+    entityType="buildings"
+    schema={buildingSchema}
+    entity={building}
 >
     <svelte:fragment slot="graphic">
         <div class="building-graphic-container">
             <svg
-                    width="220"
-                    height={(building?.floors || 1) * 70 + 50}
-                    xmlns="http://www.w3.org/2000/svg"
-                    on:click={handleUnitClick}
-                    role="img"
-                    aria-label="Schematic representation of the building"
-                    aria-hidden="true"
+                width="220"
+                height={(building?.floors || 1) * 70 + 50}
+                xmlns="http://www.w3.org/2000/svg"
+                on:click={handleUnitClick}
+                role="img"
+                aria-label="Schematic representation of the building"
+                aria-hidden="true"
             >
                 {@html generateHouseGraphic(building?.floors || 1, building?.apartments || [])}
             </svg>
@@ -106,4 +109,4 @@
             {/each}
         </ul>
     </DetailSection>
-</DetailView>
+</EntityDetail>

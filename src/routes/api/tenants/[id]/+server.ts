@@ -69,7 +69,8 @@ export const PUT: RequestHandler = async ({ params, request }) => {
         // can be deleted from the request because prisma will handle it
         delete data.createdAt;
         delete data.updatedAt;
-
+        delete data.leases;
+        
         const tenant = await prisma.tenant.update({
             where: { id },
             data

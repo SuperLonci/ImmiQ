@@ -1,10 +1,10 @@
 <script lang="ts">
-    import {onMount} from 'svelte';
-    import {page} from '$app/state';
-    import DetailView from '../../../components/DetailView.svelte';
+    import { onMount } from 'svelte';
+    import { page } from '$app/state';
+    import EntityDetail from '../../../components/EntityDetail.svelte';
     import DetailSection from '../../../components/DetailSection.svelte';
     import DetailItem from '../../../components/DetailItem.svelte';
-    import type {Meter} from '$lib/entities';
+    import { type Meter, meterSchema } from '$lib/entities';
 
     let meter: Meter;
     let loading = true;
@@ -29,16 +29,18 @@
     });
 </script>
 
-<DetailView
-        title="Meter Details"
-        backUrl="/meters"
-        loading={loading}
+<EntityDetail
+    title="Meter Details"
+    loading={loading}
+    entityType="meters"
+    schema={meterSchema}
+    entity={meter}
 >
     {#if meter}
         <DetailSection title="Meter Information">
             <DetailItem label="Type">{meter.type}</DetailItem>
             <DetailItem
-                    label="Value">{meter.value !== null && meter.value !== undefined ? `${meter.value} ${meter.unit}` : 'Not set'}</DetailItem>
+                label="Value">{meter.value !== null && meter.value !== undefined ? `${meter.value} ${meter.unit}` : 'Not set'}</DetailItem>
             <DetailItem label="Cost Per Unit">{meter.costPerUnit} per {meter.unit}</DetailItem>
             <DetailItem label="Created">{new Date(meter.createdAt).toLocaleString()}</DetailItem>
             <DetailItem label="Last Updated">{new Date(meter.updatedAt).toLocaleString()}</DetailItem>
@@ -58,4 +60,4 @@
             {/if}
         </DetailSection>
     {/if}
-</DetailView>
+</EntityDetail>

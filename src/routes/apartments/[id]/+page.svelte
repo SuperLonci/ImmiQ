@@ -1,11 +1,11 @@
 <script lang="ts">
-    import {onMount} from 'svelte';
-    import {page} from '$app/state';
-    import {generateHouseGraphic} from '$lib/houseGraphic';
-    import DetailView from '../../../components/DetailView.svelte';
+    import { onMount } from 'svelte';
+    import { page } from '$app/state';
+    import { generateHouseGraphic } from '$lib/houseGraphic';
+    import EntityDetail from '../../../components/EntityDetail.svelte';
     import DetailSection from '../../../components/DetailSection.svelte';
     import DetailButton from '../../../components/DetailButton.svelte';
-    import type {Apartment, Meter, Cost, Tenant} from '$lib/entities';
+    import { type Apartment, type Meter, type Cost, type Tenant, apartmentSchema } from '$lib/entities';
 
     let apartment: Apartment;
     let buildingMeters: Meter[] = [];
@@ -33,20 +33,22 @@
     });
 </script>
 
-<DetailView
-        title={apartment?.name || 'Unit'}
-        backUrl="/apartments"
-        loading={loading}
+<EntityDetail
+    title={apartment?.name || 'Unit'}
+    loading={loading}
+    entityType="apartments"
+    schema={apartmentSchema}
+    entity={apartment}
 >
     <svelte:fragment slot="graphic">
         <div class="house-graphic-container">
             <svg
-                    width="220"
-                    height={(apartment?.floor || 0) * 70 + 120}
-                    xmlns="http://www.w3.org/2000/svg"
-                    role="img"
-                    aria-label="Schematic representation of the house"
-                    aria-hidden="true"
+                width="220"
+                height={(apartment?.floor || 0) * 70 + 120}
+                xmlns="http://www.w3.org/2000/svg"
+                role="img"
+                aria-label="Schematic representation of the house"
+                aria-hidden="true"
             >
                 {@html generateHouseGraphic(apartment?.floor + 1 || 1, [apartment])}
             </svg>
@@ -140,4 +142,4 @@
             {/each}
         </ul>
     </DetailSection>
-</DetailView>
+</EntityDetail>

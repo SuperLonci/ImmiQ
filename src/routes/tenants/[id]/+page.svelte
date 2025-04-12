@@ -1,10 +1,10 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { page } from '$app/state';
-    import DetailView from '../../../components/DetailView.svelte';
+    import EntityDetail from '../../../components/EntityDetail.svelte';
     import DetailSection from '../../../components/DetailSection.svelte';
     import DetailItem from '../../../components/DetailItem.svelte';
-    import type { Tenant } from '$lib/entities';
+    import { type Tenant, tenantSchema } from '$lib/entities';
 
     let tenant: Tenant;
     let loading = true;
@@ -26,10 +26,12 @@
     });
 </script>
 
-<DetailView
+<EntityDetail
     title="Tenant Details"
-    backUrl="/tenants"
     loading={loading}
+    entityType="tenants"
+    schema={tenantSchema}
+    entity={tenant}
 >
     <DetailSection title="Tenant Information">
         <DetailItem label="First Name">{tenant?.firstName}</DetailItem>
@@ -38,10 +40,14 @@
         <DetailItem label="Phone Number">{tenant?.phoneNumber}</DetailItem>
     </DetailSection>
     <DetailSection title="Leases">
-        {#each tenant?.leases as lease}
-            <DetailItem label="Address">
-                {lease.apartment.building.address}
-            </DetailItem>
-        {/each}
+        {#if tenant?.leases && tenant.leases.length > 0}
+            {#each tenant.leases as lease}
+                <DetailItem label="Address">
+                    {lease.apartment.building.address}
+                </DetailItem>
+            {/each}
+        {:else}
+            No active leases
+        {/if}
     </DetailSection>
-</DetailView>
+</EntityDetail>

@@ -50,10 +50,17 @@
 
     function handleEditItem(item: any) {
         isEditing = true;
-        currentItem = {
-            ...item,
-            occurredAt: item.occurredAt ? item.occurredAt.slice(0, 10) : ''
-        };
+        // Reduce the item object to process its fields
+        currentItem = Object.keys(item).reduce((acc: Record<string, any>, key: string) => {
+            const value = item[key];
+            // Check if the field is a valid date and a string
+            if (value && typeof value === 'string' && !isNaN(Date.parse(value))) {
+                acc[key] = value.slice(0, 10); // Extract only the date (YYYY-MM-DD)
+            } else {
+                acc[key] = value;
+            }
+            return acc;
+        }, {} as Record<string, any>);
         showForm = true;
     }
 

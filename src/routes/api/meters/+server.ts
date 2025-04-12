@@ -1,5 +1,6 @@
 import prisma from '$lib/server/prisma';
-import type {RequestHandler} from './$types';
+import type { RequestHandler } from './$types';
+import { parseNumericValue } from '$lib/numericHelper';
 
 // GET all meters
 export const GET: RequestHandler = async () => {
@@ -20,7 +21,7 @@ export const GET: RequestHandler = async () => {
         });
 
         return new Response(JSON.stringify(meters), {
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
         return new Response(JSON.stringify({
@@ -28,7 +29,7 @@ export const GET: RequestHandler = async () => {
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } finally {
         await prisma.$disconnect();
@@ -36,17 +37,17 @@ export const GET: RequestHandler = async () => {
 };
 
 // POST a new meter
-export const POST: RequestHandler = async ({request}) => {
+export const POST: RequestHandler = async ({ request }) => {
     try {
         // Parse the request body
         const data = await request.json();
 
         // Clean up empty relationship fields
-        if (data.apartmentId === "") {
+        if (data.apartmentId === '') {
             delete data.apartmentId;
         }
 
-        if (data.buildingId === "") {
+        if (data.buildingId === '') {
             delete data.buildingId;
         }
 
@@ -56,7 +57,7 @@ export const POST: RequestHandler = async ({request}) => {
                 message: 'A meter cannot belong to both an apartment and a building'
             }), {
                 status: 400,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
@@ -66,35 +67,17 @@ export const POST: RequestHandler = async ({request}) => {
                 message: 'Either apartmentId or buildingId must be provided'
             }), {
                 status: 400,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
         // Handle numeric values - ensure they're properly formatted
         if (data.value !== undefined && data.value !== null) {
-            data.value = parseFloat(String(data.value).replace(',', '.'));
-
-            if (isNaN(data.value)) {
-                return new Response(JSON.stringify({
-                    message: 'Invalid numeric value for "value" field'
-                }), {
-                    status: 400,
-                    headers: {'Content-Type': 'application/json'},
-                });
-            }
+            data.value = parseNumericValue(data.value, 'value');
         }
 
         if (data.costPerUnit !== undefined) {
-            data.costPerUnit = parseFloat(String(data.costPerUnit).replace(',', '.'));
-
-            if (isNaN(data.costPerUnit)) {
-                return new Response(JSON.stringify({
-                    message: 'Invalid numeric value for "costPerUnit" field'
-                }), {
-                    status: 400,
-                    headers: {'Content-Type': 'application/json'},
-                });
-            }
+            data.costPerUnit = parseNumericValue(data.costPerUnit, 'costPerUnit');
         }
 
         // Create the meter
@@ -116,7 +99,7 @@ export const POST: RequestHandler = async ({request}) => {
 
         return new Response(JSON.stringify(meter), {
             status: 201, // Created
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
         console.error('Error creating meter:', error);
@@ -128,14 +111,14 @@ export const POST: RequestHandler = async ({request}) => {
                     message: 'A meter with these details already exists'
                 }), {
                     status: 400,
-                    headers: {'Content-Type': 'application/json'},
+                    headers: { 'Content-Type': 'application/json' }
                 });
             } else if (error.code === 'P2003') {
                 return new Response(JSON.stringify({
                     message: 'The referenced apartment or building does not exist'
                 }), {
                     status: 400,
-                    headers: {'Content-Type': 'application/json'},
+                    headers: { 'Content-Type': 'application/json' }
                 });
             }
         }
@@ -145,7 +128,7 @@ export const POST: RequestHandler = async ({request}) => {
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } finally {
         await prisma.$disconnect();

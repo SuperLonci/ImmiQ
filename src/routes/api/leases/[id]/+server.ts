@@ -81,8 +81,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
             rentAmount: data.rentAmount,
             currency: data.currency
         };
-
-        // Beziehungen aktualisieren
+        
         if (data.apartmentId) {
             updateData.apartment = { connect: { id: data.apartmentId } };
         }

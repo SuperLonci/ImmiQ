@@ -4,7 +4,6 @@
     import ListItemDetail from './ListItemDetail.svelte';
     import EntityForm from './EntityForm.svelte';
 
-    // Original EntityList props
     export let title: string;
     export let items: any[] = [];
     export let loading: boolean = false;
@@ -25,10 +24,7 @@
         mutuallyExclusiveWith?: string[]; // Added for mutual exclusion
     }> = []; // Schema provided by the page component
 
-    // Form state
-    let showForm = false;
-    let isEditing = false;
-    let currentItem: any = {};
+    let entityForm: EntityForm;
 
     // Delete confirmation state
     let showDeleteConfirm = false;
@@ -36,24 +32,25 @@
 
     // Get entity type from basePath
     $: entityType = basePath.split('/').filter(p => p).pop() || '';
-    $: entityName = entityType.replace(/s$/, ''); // Remove trailing 's' for singular form
 
+    // Navigation function to view entity details
     function viewDetails(id: string) {
         goto(`${basePath}/${id}`);
     }
 
+    // Open form for adding a new entity
     function handleAddNew() {
-        isEditing = false;
-        currentItem = {};
-        showForm = true;
+        if (entityForm) {
+            entityForm.openForm({}, false);
+        }
     }
 
+    // Open form for editing an existing entity
     function handleEditItem(item: any) {
-        isEditing = true;
-        // Reduce the item object to process its fields
-        currentItem = Object.keys(item).reduce((acc: Record<string, any>, key: string) => {
+        // Format date values for the form (YYYY-MM-DD)
+        const formattedItem = Object.keys(item).reduce((acc: Record<string, any>, key: string) => {
             const value = item[key];
-            // Check if the field is a valid date and a string
+            // Check if the field is a valid date string
             if (value && typeof value === 'string' && !isNaN(Date.parse(value))) {
                 acc[key] = value.slice(0, 10); // Extract only the date (YYYY-MM-DD)
             } else {
@@ -61,9 +58,13 @@
             }
             return acc;
         }, {} as Record<string, any>);
-        showForm = true;
+
+        if (entityForm) {
+            entityForm.openForm(formattedItem, true);
+        }
     }
 
+    // Show delete confirmation dialog
     function handleDeleteItem(item: any) {
         itemToDelete = item;
         showDeleteConfirm = true;
@@ -87,7 +88,6 @@
                 showDeleteConfirm = false;
                 itemToDelete = null;
             } else {
-                // Error handling
                 let errorMessage = 'Unknown error occurred';
                 try {
                     const errorData = await response.json();
@@ -108,49 +108,15 @@
         itemToDelete = null;
     }
 
-    async function handleFormSubmit(event: CustomEvent) {
-        const { data, isEditing } = event.detail;
-
-        try {
-            const endpoint = `/api${basePath}${isEditing ? `/${data.id}` : ''}`;
-            const method = isEditing ? 'PUT' : 'POST';
-
-            const response = await fetch(endpoint, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                // Refresh the data
-                await fetchItems();
-                // Close form after successful submission
-                showForm = false;
-            } else {
-                // More robust error handling
-                let errorMessage = 'Unknown error occurred';
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorMessage;
-                } catch (jsonError) {
-                    // If response isn't valid JSON, use status text
-                    errorMessage = response.statusText || errorMessage;
-                }
-                alert(`Error: ${errorMessage}`);
-            }
-        } catch (error) {
-            console.error('Error submitting form:', error);
-            alert('An unexpected error occurred');
-        }
+    async function handleFormSubmit() {
+        // Refresh data after successful form submission
+        await fetchItems();
     }
 
     function handleFormError(event: CustomEvent) {
         alert(event.detail.message);
     }
 
-    // Fetch items function for refreshing after form submit
     async function fetchItems() {
         try {
             loading = true;
@@ -221,14 +187,13 @@
     {/if}
 </div>
 
-<!-- Popup form component -->
 <EntityForm
-    entityType={entityName}
+    bind:this={entityForm}
+    {entityType}
     {schema}
-    initialData={currentItem}
-    isOpen={showForm}
-    isEditing={isEditing}
-    on:close={() => showForm = false}
+    initialData={{}}
+    isOpen={false}
+    apiBasePath={`/api/${entityType}`}
     on:submit={handleFormSubmit}
     on:error={handleFormError}
 />

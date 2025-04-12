@@ -9,49 +9,23 @@
     export let schema: any[] = [];
     export let entity: any = null;
 
-    let showForm = false;
-    let formErrorMessage: string | null = null;
+    let entityForm: EntityForm;
 
+    // Open the edit form for the current entity
     function onEdit() {
-        showForm = true;
-    }
-
-    // Refresh the page after successful form submission
-    async function handleFormSubmit(event: CustomEvent) {
-        const { data } = event.detail;
-
-        try {
-            const endpoint = `/api/${entityType}/${data.id}`;
-            const response = await fetch(endpoint, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                // Refresh the page to show updated data
-                window.location.reload();
-            } else {
-                // Handle error
-                let errorMessage = 'Unknown error occurred';
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorMessage;
-                } catch (jsonError) {
-                    errorMessage = response.statusText || errorMessage;
-                }
-                formErrorMessage = errorMessage;
-            }
-        } catch (error) {
-            console.error('Error updating entity:', error);
-            formErrorMessage = 'An unexpected error occurred';
+        if (entityForm && entity) {
+            entityForm.openForm(entity, true);
         }
     }
 
+    // Refresh the page after successful form submission
+    async function handleFormSubmit() {
+        window.location.reload();
+    }
+
+    // Handle form submission errors
     function handleFormError(event: CustomEvent) {
-        formErrorMessage = event.detail.message;
+        console.error('Form error:', event.detail.message);
     }
 
     function goBack() {
@@ -87,22 +61,16 @@
 </div>
 
 <!-- Entity Form for editing -->
-{#if entity}
-    <EntityForm
-        {entityType}
-        {schema}
-        initialData={entity}
-        isOpen={showForm}
-        isEditing={true}
-        errorMessage={formErrorMessage}
-        on:close={() => {
-            showForm = false;
-            formErrorMessage = null;
-        }}
-        on:submit={handleFormSubmit}
-        on:error={handleFormError}
-    />
-{/if}
+<EntityForm
+    bind:this={entityForm}
+    {entityType}
+    {schema}
+    initialData={{}}
+    isOpen={false}
+    apiBasePath={`/api/${entityType}`}
+    on:submit={handleFormSubmit}
+    on:error={handleFormError}
+/>
 
 <style>
     .detail-container {

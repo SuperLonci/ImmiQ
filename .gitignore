@@ -8,6 +8,11 @@ node_modules
 .svelte-kit
 /build
 
+# Database
+prisma/migrations
+*.sqlite
+*.db
+
 # OS
 .DS_Store
 Thumbs.db
@@ -23,3 +28,4 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 .idea
+.vscode

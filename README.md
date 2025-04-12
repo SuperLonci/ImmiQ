@@ -60,21 +60,15 @@ Built for simplicity and scalability, it ensures seamless real estate management
     ```sh
     npm install
     ```
-4. Set up postgresql database
-
-5. Create a `.env` file in the root directory and set up your database connection string:
-    ```env
-    DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME"
-    ```
-6. Run the Prisma migrations to set up the database:
+4. Run the Prisma migrations to set up the database:
     ```sh
     npx prisma migrate dev --name init
     ```
-
-7. Seed the database with initial data:
-    ```sh
-    npx prisma db seed
-    ```
+   This should also run the 'prisma db seed' command to seed the database with initial data. If this does not happen,
+   run:
+   ```sh
+   npx prisma db seed
+   ```
 
 ### Running the Application
 

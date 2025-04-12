@@ -1,5 +1,5 @@
 import prisma from '$lib/server/prisma';
-import type {RequestHandler} from './$types';
+import type { RequestHandler } from './$types';
 
 // GET all leases
 export const GET: RequestHandler = async () => {
@@ -20,7 +20,7 @@ export const GET: RequestHandler = async () => {
         });
 
         return new Response(JSON.stringify(leases), {
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
         return new Response(JSON.stringify({
@@ -28,7 +28,7 @@ export const GET: RequestHandler = async () => {
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } finally {
         await prisma.$disconnect();
@@ -36,10 +36,18 @@ export const GET: RequestHandler = async () => {
 };
 
 // POST a new lease
-export const POST: RequestHandler = async ({request}) => {
+export const POST: RequestHandler = async ({ request }) => {
     try {
         // Parse the request body
         const data = await request.json();
+
+        // Ensure dates are in ISO-8601 format
+        if (data.startDate) {
+            data.startDate = new Date(data.startDate).toISOString();
+        }
+        if (data.endDate) {
+            data.endDate = new Date(data.endDate).toISOString();
+        }
 
         // Create the lease
         const lease = await prisma.lease.create({
@@ -60,7 +68,7 @@ export const POST: RequestHandler = async ({request}) => {
 
         return new Response(JSON.stringify(lease), {
             status: 201, // Created
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
         console.error('Error creating lease:', error);
@@ -71,7 +79,7 @@ export const POST: RequestHandler = async ({request}) => {
                 message: 'A lease with these details already exists'
             }), {
                 status: 400,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
@@ -80,7 +88,7 @@ export const POST: RequestHandler = async ({request}) => {
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } finally {
         await prisma.$disconnect();

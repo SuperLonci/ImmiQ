@@ -264,6 +264,7 @@
         align-items: center;
         margin-bottom: 20px;
         padding-bottom: 10px;
+        padding-right: 30px;
         border-bottom: 1px solid #e0e0e0;
     }
 

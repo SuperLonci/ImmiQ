@@ -1,10 +1,10 @@
 <script lang="ts">
-    import {onMount} from 'svelte';
-    import {page} from '$app/state';
+    import { onMount } from 'svelte';
+    import { page } from '$app/state';
     import DetailView from '../../../components/DetailView.svelte';
     import DetailSection from '../../../components/DetailSection.svelte';
     import DetailItem from '../../../components/DetailItem.svelte';
-    import type {Cost} from '$lib/entities';
+    import type { Cost } from '$lib/entities';
 
     let cost: Cost;
     let loading = true;
@@ -27,13 +27,18 @@
 </script>
 
 <DetailView
-        title="Cost Details"
-        backUrl="/costs"
-        loading={loading}
+    title="Cost Details"
+    backUrl="/costs"
+    loading={loading}
 >
     <DetailSection title="Cost Information">
         <DetailItem label="Description">{cost?.name}</DetailItem>
         <DetailItem label="Amount">{cost?.amount} {cost?.currency}</DetailItem>
         <DetailItem label="Interval">{cost?.interval}</DetailItem>
+        <DetailItem label="Type">{cost?.type}</DetailItem>
+        <DetailItem label="Biller">{cost?.biller}</DetailItem>
+        <DetailItem
+            label="Occurred At">{cost?.occurredAt ? new Date(cost.occurredAt).toLocaleDateString() : 'N/A'}</DetailItem>
+        <DetailItem label="Location">{cost.building?.name || cost.apartment?.name || 'N/A'}</DetailItem>
     </DetailSection>
 </DetailView>

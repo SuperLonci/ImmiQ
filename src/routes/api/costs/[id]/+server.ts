@@ -8,7 +8,19 @@ export const GET: RequestHandler = async ({ params }) => {
         const id = params.id;
 
         const cost = await prisma.cost.findUnique({
-            where: { id }
+            where: { id },
+            include: {
+                apartment: {
+                    select: {
+                        name: true
+                    }
+                },
+                building: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
         });
 
         if (!cost) {

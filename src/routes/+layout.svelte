@@ -1,18 +1,19 @@
 <script lang="ts">
-    import "../app.css";
-    import Footer from "../components/Footer.svelte";
+    import '../app.css';
+    import Footer from '../components/Footer.svelte';
     import UserSession from '../components/UserSession.svelte';
-    import type {PageData} from './$types';
+    import type { PageData } from './$types';
 
     export let data: PageData;
 
     let menuItems = [
-        {name: 'Buildings', path: '/buildings'},
-        {name: 'Apartments', path: '/apartments'},
-        {name: 'Meters', path: '/meters'},
-        {name: 'Costs', path: '/costs'},
-        {name: 'Leases', path: '/leases'},
-        {name: 'Tenants', path: '/tenants'},
+        { name: 'Buildings', path: '/buildings' },
+        { name: 'Apartments', path: '/apartments' },
+        { name: 'Meters', path: '/meters' },
+        { name: 'Costs', path: '/costs' },
+        { name: 'Leases', path: '/leases' },
+        { name: 'Tenants', path: '/tenants' },
+        { name: 'Addresses', path: '/addresses' }
     ];
 
     let isSidebarCollapsed = false;
@@ -51,7 +52,8 @@
 
 <div class="flex h-screen bg-primary">
     <!-- Sidebar -->
-    <aside class="sidebar w-64 bg-secondary text-white p-4 shadow-lg rounded-r-2xl {isSidebarCollapsed ? 'collapsed' : ''}">
+    <aside
+        class="sidebar w-64 bg-secondary text-white p-4 shadow-lg rounded-r-2xl {isSidebarCollapsed ? 'collapsed' : ''}">
         <h2 class="header-text text-2xl font-bold text-gray-800 mb-6">ImmiQ</h2>
         <nav>
             {#each menuItems as item}
@@ -72,15 +74,15 @@
                 &#9776; <!-- Burger menu icon -->
             </button>
             <h1 class="text-xl font-bold text-gray-800">Dashboard</h1>
-            <UserSession user={data.user}/>
+            <UserSession user={data.user} />
         </header>
 
         <!-- Dynamic Content -->
         <main class="flex-1 p-6 overflow-y-auto main-content">
-            <slot/>
+            <slot />
         </main>
 
         <!-- Footer Component -->
-        <Footer/>
+        <Footer />
     </div>
 </div>

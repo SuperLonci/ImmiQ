@@ -2,27 +2,21 @@ import prisma from '$lib/server/prisma';
 import type { RequestHandler } from './$types';
 
 // GET a specific address by ID
-export const GET: RequestHandler = async ({ params, locals }) => {
+export const GET: RequestHandler = async ({ params }) => {
     try {
         // Access the id from params
         const id = params.id;
 
         const address = await prisma.address.findUnique({
             where: { id },
-            include: {}
+            include: {
+                buildings: true
+            }
         });
 
         if (!address) {
             return new Response(JSON.stringify({ message: 'address not found' }), {
                 status: 404,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
-
-        // Check if user has access to this address
-        if (locals.user && address.userId !== locals.user.id) {
-            return new Response(JSON.stringify({ message: 'Unauthorized access' }), {
-                status: 403,
                 headers: { 'Content-Type': 'application/json' }
             });
         }
@@ -111,14 +105,12 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 };
 
 // DELETE an address
-export const DELETE: RequestHandler = async ({ params, locals }) => {
+export const DELETE: RequestHandler = async ({ params }) => {
     try {
         const id = params.id;
 
-        // Verify ownership of the address
         const existingAddress = await prisma.address.findUnique({
-            where: { id },
-            select: { userId: true }
+            where: { id }
         });
 
         if (!existingAddress) {
@@ -126,15 +118,6 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
                 message: 'address not found'
             }), {
                 status: 404,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
-
-        if (existingAddress.userId !== locals.user!.id) {
-            return new Response(JSON.stringify({
-                message: 'Unauthorized: You do not own this address'
-            }), {
-                status: 403,
                 headers: { 'Content-Type': 'application/json' }
             });
         }

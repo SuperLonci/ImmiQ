@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {page} from '$app/state';
+    import { page } from '$app/state';
 
     export let user: App.PageData['user'];
 
@@ -31,10 +31,7 @@
 
 <style>
     .user-session-links {
-        /*background-color: #e8dac4; !* Change to desired background color *!*/
         padding: 0.5rem;
-        /*box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);*/
-        border-radius: 0.5rem;
     }
 
     .user-links {
@@ -53,7 +50,7 @@
         text-decoration: none;
         cursor: pointer;
         padding: 0.4rem 1rem;
-        border-radius: 0.25rem;
+        border-radius: 0.75rem;
         transition: box-shadow 0.2s ease, transform 0.2s ease;
         background-color: #f1e1af;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

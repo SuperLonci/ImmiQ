@@ -1,38 +1,38 @@
 import prisma from '$lib/server/prisma';
-import type {RequestHandler} from './$types';
+import type { RequestHandler } from './$types';
 
 // GET a specific building by ID
-export const GET: RequestHandler = async ({params, locals}) => {
+export const GET: RequestHandler = async ({ params, locals }) => {
     try {
         // Access the id from params
         const id = params.id;
 
         const building = await prisma.building.findUnique({
-            where: {id},
+            where: { id },
             include: {
                 apartments: true,
                 costs: true,
                 meters: true
-            },
+            }
         });
 
         if (!building) {
-            return new Response(JSON.stringify({message: 'Building not found'}), {
+            return new Response(JSON.stringify({ message: 'Building not found' }), {
                 status: 404,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
         // Check if user has access to this building
         if (locals.user && building.userId !== locals.user.id) {
-            return new Response(JSON.stringify({message: 'Unauthorized access'}), {
+            return new Response(JSON.stringify({ message: 'Unauthorized access' }), {
                 status: 403,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
         return new Response(JSON.stringify(building), {
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
         return new Response(JSON.stringify({
@@ -40,7 +40,7 @@ export const GET: RequestHandler = async ({params, locals}) => {
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } finally {
         await prisma.$disconnect();
@@ -48,14 +48,14 @@ export const GET: RequestHandler = async ({params, locals}) => {
 };
 
 // PUT to update a building
-export const PUT: RequestHandler = async ({params, request, locals}) => {
+export const PUT: RequestHandler = async ({ params, request, locals }) => {
     try {
         const id = params.id;
 
         // Verify ownership of the building
         const existingBuilding = await prisma.building.findUnique({
-            where: {id},
-            select: {userId: true}
+            where: { id },
+            select: { userId: true }
         });
 
         if (!existingBuilding) {
@@ -63,7 +63,7 @@ export const PUT: RequestHandler = async ({params, request, locals}) => {
                 message: 'Building not found'
             }), {
                 status: 404,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
@@ -72,20 +72,24 @@ export const PUT: RequestHandler = async ({params, request, locals}) => {
                 message: 'Unauthorized: You do not own this building'
             }), {
                 status: 403,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
         const data = await request.json();
 
+        delete data.createdAt;
+        delete data.updatedAt;
+        delete data.apartments;
+
         const building = await prisma.building.update({
-            where: {id},
+            where: { id },
             data,
-            include: {apartments: true}
+            include: { apartments: true }
         });
 
         return new Response(JSON.stringify(building), {
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
         console.error('Error updating building:', error);
@@ -96,7 +100,7 @@ export const PUT: RequestHandler = async ({params, request, locals}) => {
                 message: 'Building not found'
             }), {
                 status: 404,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
@@ -105,7 +109,7 @@ export const PUT: RequestHandler = async ({params, request, locals}) => {
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } finally {
         await prisma.$disconnect();
@@ -113,14 +117,14 @@ export const PUT: RequestHandler = async ({params, request, locals}) => {
 };
 
 // DELETE a building
-export const DELETE: RequestHandler = async ({params, locals}) => {
+export const DELETE: RequestHandler = async ({ params, locals }) => {
     try {
         const id = params.id;
 
         // Verify ownership of the building
         const existingBuilding = await prisma.building.findUnique({
-            where: {id},
-            select: {userId: true}
+            where: { id },
+            select: { userId: true }
         });
 
         if (!existingBuilding) {
@@ -128,7 +132,7 @@ export const DELETE: RequestHandler = async ({params, locals}) => {
                 message: 'Building not found'
             }), {
                 status: 404,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
@@ -137,16 +141,16 @@ export const DELETE: RequestHandler = async ({params, locals}) => {
                 message: 'Unauthorized: You do not own this building'
             }), {
                 status: 403,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
         await prisma.building.delete({
-            where: {id},
+            where: { id }
         });
 
-        return new Response(JSON.stringify({message: 'Building deleted successfully'}), {
-            headers: {'Content-Type': 'application/json'},
+        return new Response(JSON.stringify({ message: 'Building deleted successfully' }), {
+            headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
         console.error('Error deleting building:', error);
@@ -157,7 +161,7 @@ export const DELETE: RequestHandler = async ({params, locals}) => {
                 message: 'Building not found'
             }), {
                 status: 404,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
@@ -166,7 +170,7 @@ export const DELETE: RequestHandler = async ({params, locals}) => {
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } finally {
         await prisma.$disconnect();

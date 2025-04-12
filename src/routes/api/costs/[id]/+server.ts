@@ -1,25 +1,25 @@
 import prisma from '$lib/server/prisma';
-import type {RequestHandler} from './$types';
+import type { RequestHandler } from './$types';
 
 // GET a specific cost by ID
-export const GET: RequestHandler = async ({params}) => {
+export const GET: RequestHandler = async ({ params }) => {
     try {
         // Access the id from params
         const id = params.id;
 
         const cost = await prisma.cost.findUnique({
-            where: {id}
+            where: { id }
         });
 
         if (!cost) {
-            return new Response(JSON.stringify({message: 'Cost not found'}), {
+            return new Response(JSON.stringify({ message: 'Cost not found' }), {
                 status: 404,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
         return new Response(JSON.stringify(cost), {
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
         return new Response(JSON.stringify({
@@ -27,7 +27,7 @@ export const GET: RequestHandler = async ({params}) => {
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } finally {
         await prisma.$disconnect();
@@ -35,13 +35,13 @@ export const GET: RequestHandler = async ({params}) => {
 };
 
 // PUT to update a cost
-export const PUT: RequestHandler = async ({params, request}) => {
+export const PUT: RequestHandler = async ({ params, request }) => {
     try {
         const id = params.id;
 
         // Verify cost exists
         const existingCost = await prisma.cost.findUnique({
-            where: {id}
+            where: { id }
         });
 
         if (!existingCost) {
@@ -49,19 +49,53 @@ export const PUT: RequestHandler = async ({params, request}) => {
                 message: 'Cost not found'
             }), {
                 status: 404,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
         const data = await request.json();
 
+        // Clean up empty relationship fields
+        if (data.apartmentId === '') {
+            delete data.apartmentId;
+        }
+
+        if (data.buildingId === '') {
+            delete data.buildingId;
+        }
+
+        // Validate relationships
+        if (data.apartmentId && data.buildingId) {
+            return new Response(JSON.stringify({
+                message: 'A cost cannot belong to both an apartment and a building'
+            }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        if (!data.apartmentId && !data.buildingId) {
+            return new Response(JSON.stringify({
+                message: 'Either apartmentId or buildingId must be provided'
+            }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        // Ensure occurredAt is in ISO-8601 format
+        if (data.occurredAt) {
+            data.occurredAt = new Date(data.occurredAt).toISOString();
+        }
+
+        // Update the cost
         const cost = await prisma.cost.update({
-            where: {id},
+            where: { id },
             data
         });
 
         return new Response(JSON.stringify(cost), {
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
         console.error('Error updating cost:', error);
@@ -72,7 +106,7 @@ export const PUT: RequestHandler = async ({params, request}) => {
                 message: 'Cost not found'
             }), {
                 status: 404,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
@@ -81,7 +115,7 @@ export const PUT: RequestHandler = async ({params, request}) => {
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } finally {
         await prisma.$disconnect();
@@ -89,13 +123,13 @@ export const PUT: RequestHandler = async ({params, request}) => {
 };
 
 // DELETE a cost
-export const DELETE: RequestHandler = async ({params}) => {
+export const DELETE: RequestHandler = async ({ params }) => {
     try {
         const id = params.id;
 
         // Verify cost exists
         const existingCost = await prisma.cost.findUnique({
-            where: {id}
+            where: { id }
         });
 
         if (!existingCost) {
@@ -103,16 +137,16 @@ export const DELETE: RequestHandler = async ({params}) => {
                 message: 'Cost not found'
             }), {
                 status: 404,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
         await prisma.cost.delete({
-            where: {id},
+            where: { id }
         });
 
-        return new Response(JSON.stringify({message: 'Cost deleted successfully'}), {
-            headers: {'Content-Type': 'application/json'},
+        return new Response(JSON.stringify({ message: 'Cost deleted successfully' }), {
+            headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
         console.error('Error deleting cost:', error);
@@ -123,7 +157,7 @@ export const DELETE: RequestHandler = async ({params}) => {
                 message: 'Cost not found'
             }), {
                 status: 404,
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' }
             });
         }
 
@@ -132,7 +166,7 @@ export const DELETE: RequestHandler = async ({params}) => {
             details: error instanceof Error ? error.message : 'Unknown error'
         }), {
             status: 500,
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' }
         });
     } finally {
         await prisma.$disconnect();

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {goto} from '$app/navigation';
+    import { goto } from '$app/navigation';
     import ListItem from './ListItem.svelte';
     import ListItemDetail from './ListItemDetail.svelte';
     import EntityForm from './EntityForm.svelte';
@@ -50,7 +50,10 @@
 
     function handleEditItem(item: any) {
         isEditing = true;
-        currentItem = {...item};
+        currentItem = {
+            ...item,
+            occurredAt: item.occurredAt ? item.occurredAt.slice(0, 10) : ''
+        };
         showForm = true;
     }
 
@@ -99,7 +102,7 @@
     }
 
     async function handleFormSubmit(event: CustomEvent) {
-        const {data, isEditing} = event.detail;
+        const { data, isEditing } = event.detail;
 
         try {
             const endpoint = `/api${basePath}${isEditing ? `/${data.id}` : ''}`;
@@ -187,21 +190,21 @@
             {#each items as item (item.id)}
                 {#if detailed}
                     <ListItemDetail
-                            {item}
-                            {displayProperty}
-                            on:click={() => viewDetails(item.id)}
-                            on:edit={() => handleEditItem(item)}
-                            on:delete={() => handleDeleteItem(item)}
+                        {item}
+                        {displayProperty}
+                        on:click={() => viewDetails(item.id)}
+                        on:edit={() => handleEditItem(item)}
+                        on:delete={() => handleDeleteItem(item)}
                     >
                         <slot name="item-content" {item}></slot>
                     </ListItemDetail>
                 {:else}
                     <ListItem
-                            {item}
-                            {displayProperty}
-                            on:click={() => viewDetails(item.id)}
-                            on:edit={() => handleEditItem(item)}
-                            on:delete={() => handleDeleteItem(item)}
+                        {item}
+                        {displayProperty}
+                        on:click={() => viewDetails(item.id)}
+                        on:edit={() => handleEditItem(item)}
+                        on:delete={() => handleDeleteItem(item)}
                     >
                         <slot name="item-content" {item}></slot>
                     </ListItem>
@@ -213,14 +216,14 @@
 
 <!-- Popup form component -->
 <EntityForm
-        entityType={entityName}
-        {schema}
-        initialData={currentItem}
-        isOpen={showForm}
-        isEditing={isEditing}
-        on:close={() => showForm = false}
-        on:submit={handleFormSubmit}
-        on:error={handleFormError}
+    entityType={entityName}
+    {schema}
+    initialData={currentItem}
+    isOpen={showForm}
+    isEditing={isEditing}
+    on:close={() => showForm = false}
+    on:submit={handleFormSubmit}
+    on:error={handleFormError}
 />
 
 <!-- Delete confirmation modal -->

@@ -140,6 +140,7 @@ model Payment {
 
 model Tenant {
   id          String   @id @default(uuid())
+  firstName   String
   name        String
   email       String   @unique
   phoneNumber String

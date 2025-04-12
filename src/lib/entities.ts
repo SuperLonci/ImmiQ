@@ -85,6 +85,7 @@ export interface Payment {
 
 export interface Tenant {
     id: string;
+    firstName: string;
     name: string;
     email: string;
     phoneNumber: string;
@@ -164,15 +165,15 @@ export type FormFieldSchema = {
 
 // Building schema (no required dependencies)
 export const buildingSchema: FormFieldSchema[] = [
-    {name: 'name', type: 'text', label: 'Building Name', required: true},
-    {name: 'address', type: 'text', label: 'Address', required: true},
-    {name: 'floors', type: 'number', label: 'Number of Floors', required: true}
+    { name: 'name', type: 'text', label: 'Building Name', required: true },
+    { name: 'address', type: 'text', label: 'Address', required: true },
+    { name: 'floors', type: 'number', label: 'Number of Floors', required: true }
 ];
 
 // Apartment schema (requires a building)
 export const apartmentSchema: FormFieldSchema[] = [
-    {name: 'name', type: 'text', label: 'Apartment Name', required: true},
-    {name: 'size', type: 'number', label: 'Size', required: true},
+    { name: 'name', type: 'text', label: 'Apartment Name', required: true },
+    { name: 'size', type: 'number', label: 'Size', required: true },
     {
         name: 'sizeUnit',
         type: 'select',
@@ -189,7 +190,7 @@ export const apartmentSchema: FormFieldSchema[] = [
         displayProperty: 'name',
         relationship: 'one-to-one'
     },
-    {name: 'floor', type: 'number', label: 'Floor Number', required: true},
+    { name: 'floor', type: 'number', label: 'Floor Number', required: true },
     {
         name: 'type',
         type: 'select',
@@ -201,8 +202,8 @@ export const apartmentSchema: FormFieldSchema[] = [
 
 // Cost schema (requires either a building OR an apartment, not both)
 export const costSchema: FormFieldSchema[] = [
-    {name: 'name', type: 'text', label: 'Cost Name', required: true},
-    {name: 'amount', type: 'number', label: 'Amount', required: true},
+    { name: 'name', type: 'text', label: 'Cost Name', required: true },
+    { name: 'amount', type: 'number', label: 'Amount', required: true },
     {
         name: 'currency',
         type: 'select',
@@ -224,8 +225,8 @@ export const costSchema: FormFieldSchema[] = [
         options: Object.values(CostInterval),
         required: true
     },
-    {name: 'biller', type: 'text', label: 'Biller', required: true},
-    {name: 'occurredAt', type: 'date', label: 'Date Occurred', required: true},
+    { name: 'biller', type: 'text', label: 'Biller', required: true },
+    { name: 'occurredAt', type: 'date', label: 'Date Occurred', required: true },
     {
         name: 'buildingId',
         type: 'entity-select',
@@ -250,7 +251,7 @@ export const costSchema: FormFieldSchema[] = [
 
 // Payment schema (requires an apartment)
 export const paymentSchema: FormFieldSchema[] = [
-    {name: 'amount', type: 'number', label: 'Amount', required: true},
+    { name: 'amount', type: 'number', label: 'Amount', required: true },
     {
         name: 'currency',
         type: 'select',
@@ -258,8 +259,8 @@ export const paymentSchema: FormFieldSchema[] = [
         options: Object.values(Currency),
         required: true
     },
-    {name: 'dueDate', type: 'date', label: 'Due Date', required: true},
-    {name: 'status', type: 'text', label: 'Status', required: true},
+    { name: 'dueDate', type: 'date', label: 'Due Date', required: true },
+    { name: 'status', type: 'text', label: 'Status', required: true },
     {
         name: 'type',
         type: 'select',
@@ -280,16 +281,17 @@ export const paymentSchema: FormFieldSchema[] = [
 
 // Tenant schema (no required dependencies)
 export const tenantSchema: FormFieldSchema[] = [
-    {name: 'name', type: 'text', label: 'Tenant Name', required: true},
-    {name: 'email', type: 'text', label: 'Email', required: true},
-    {name: 'phoneNumber', type: 'text', label: 'Phone Number', required: true}
+    { name: 'firstName', type: 'text', label: 'First Name', required: true },
+    { name: 'name', type: 'text', label: 'Last Name', required: true },
+    { name: 'email', type: 'text', label: 'Email', required: true },
+    { name: 'phoneNumber', type: 'text', label: 'Phone Number', required: false }
 ];
 
 // Lease schema (requires an apartment and a tenant)
 export const leaseSchema: FormFieldSchema[] = [
-    {name: 'startDate', type: 'date', label: 'Start Date', required: true},
-    {name: 'endDate', type: 'date', label: 'End Date', required: false},
-    {name: 'rentAmount', type: 'number', label: 'Rent Amount', required: true},
+    { name: 'startDate', type: 'date', label: 'Start Date', required: true },
+    { name: 'endDate', type: 'date', label: 'End Date', required: false },
+    { name: 'rentAmount', type: 'number', label: 'Rent Amount', required: true },
     {
         name: 'currency',
         type: 'select',
@@ -319,10 +321,10 @@ export const leaseSchema: FormFieldSchema[] = [
 
 // Meter schema (requires either a building OR an apartment, not both)
 export const meterSchema: FormFieldSchema[] = [
-    {name: 'type', type: 'text', label: 'Meter Type', required: true},
-    {name: 'value', type: 'number', label: 'Meter Value', required: false, step: '0.01'},
-    {name: 'unit', type: 'text', label: 'Unit', required: true},
-    {name: 'costPerUnit', type: 'number', label: 'Cost Per Unit', required: true, step: '0.001'},
+    { name: 'type', type: 'text', label: 'Meter Type', required: true },
+    { name: 'value', type: 'number', label: 'Meter Value', required: false, step: '0.01' },
+    { name: 'unit', type: 'text', label: 'Unit', required: true },
+    { name: 'costPerUnit', type: 'number', label: 'Cost Per Unit', required: true, step: '0.001' },
     {
         name: 'buildingId',
         type: 'entity-select',

@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '$lib/server/prisma';
 
 async function clearDatabase() {
     console.log('🌱 Clearing existing data...');
